@@ -43,6 +43,22 @@ trait ItemSearchTrait
             });
         }
 
+        // Order by relevance - give higher scores to exact matches and partial matches
+        $query->orderByRaw("(
+            CASE 
+                WHEN name = ? THEN 2 
+                WHEN code = ? THEN 2 
+                WHEN name LIKE ? THEN 1 
+                WHEN code LIKE ? THEN 1 
+                ELSE 0 
+            END
+        ) DESC", [
+            $searchTerm,  // Exact name match
+            $searchTerm,  // Exact code match
+            '%' . $searchTerm . '%',  // Partial name match
+            '%' . $searchTerm . '%'   // Partial code match
+        ]);
+
         return $query
             ->select(['id', 'name', 'code'])
             ->limit($limit)

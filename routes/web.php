@@ -22,6 +22,8 @@ use App\Livewire\TransferForm;
 use App\Livewire\DepartmentReport;
 use App\Livewire\TrustSearch;
 use App\Livewire\DocumentSearch;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Livewire\Actions\Logout;
 
 Route::view('/', 'welcome');
 
@@ -48,6 +50,9 @@ Route::get('/management-category', ManagementCategory::class)->name('management-
 Route::get('/management-subcategory', ManagementSubcategory::class)->name('management-subcategory');
 Route::get('backup-manager', BackupManager::class)->name('backup-manager');
 // Authenticated Routes
+// Logout
+Route::get('logout', [Logout::class, '__invoke'])->name('logout');
+// Route::post('logout', [Logout::class, '__invoke'])->name('logout');
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

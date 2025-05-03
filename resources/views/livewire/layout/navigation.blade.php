@@ -157,6 +157,9 @@ new class extends Component {
                         <x-dropdown-link :href="route('backup-manager')" wire:navigate>
                             {{ __('Backup Manager') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('logout')">
+                            {{ __('Logout') }}
+                        </x-dropdown-link>
                     </x-slot>
                 </x-dropdown>
             </div>

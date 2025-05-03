@@ -93,40 +93,61 @@
 
         <!-- Selected Items Table -->
         <div class="mb-6">
-            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="py-3 px-4 border text-left">ID</th>
-                        <th class="py-3 px-4 border-b text-left">Item</th>
-                        <th class="py-3 px-4 border-b text-left">Code</th>
-                        <th class="py-3 px-4 border-b text-left">Quantity</th>
-                        <th class="py-3 px-4 border-b text-left">Possible Amount</th>
-                        <th class="py-3 px-4 border-b text-left">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($selectedItems as $index => $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-2 px-4 border-b text-left">{{ $index + 1 }}</td>
-                            <td class="py-2 px-4 border-b text-left" dir="rtl">{{ $item['name'] }}</td>
-                            <td class="py-2 px-4 border-b text-left">{{ $item['code'] }}</td>
-                            <td class="py-2 px-4 border-b">
-                                <input type="number" step="0.0001" wire:model="selectedItems.{{ $index }}.quantity"
-                                    class="w-20 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </td>
-                            <td class="py-2 px-4 border-b">
-                                <span>{{ $item['possible_amount'] }}</span> <!-- Display possible amount -->
-                            </td>
-                            <td class="py-2 px-4 border-b">
-                                <button type="button" wire:click="removeSelectedItem({{ $index }})"
-                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                                    Remove
-                                </button>
-                            </td>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-3 px-4 border text-left">ID</th>
+                            <th class="py-3 px-4 border-b text-left">Item</th>
+                            <th class="py-3 px-4 border-b text-left">Code</th>
+                            <th class="py-3 px-4 border-b text-left">Quantity</th>
+                            <th class="py-3 px-4 border-b text-left">Possible Amount</th>
+                            <th class="py-3 px-4 border-b text-left">Action</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($selectedItems as $index => $item)
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-2 px-4 border-b text-left">{{ $index + 1 }}</td>
+                                <td class="py-2 px-4 border-b text-left" dir="rtl">
+                                    <div class="flex items-center">
+                                        <span class="block md:hidden">Item:</span>
+                                        {{ $item['name'] }}
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border-b text-left">
+                                    <div class="flex items-center">
+                                        <span class="block md:hidden">Code:</span>
+                                        {{ $item['code'] }}
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border-b">
+                                    <div class="flex items-center">
+                                        <span class="block md:hidden">Qty:</span>
+                                        <input type="number" step="0.0001" wire:model="selectedItems.{{ $index }}.quantity"
+                                            class="w-20 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border-b">
+                                    <div class="flex items-center">
+                                        <span class="block md:hidden">Possible:</span>
+                                        <span>{{ $item['possible_amount'] }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border-b">
+                                    <div class="flex items-center">
+                                        <button type="button" wire:click="removeSelectedItem({{ $index }})"
+                                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                            <span class="block md:hidden">Remove</span>
+                                            <span class="hidden md:block">Remove Item</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Save Button -->

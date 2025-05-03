@@ -77,9 +77,9 @@
             </div>
 
             {{-- Tax Rate and Search Items --}}
-            <div class="flex gap-4 mb-6 justify-between">
+            <div class="flex flex-col md:flex-row gap-4 mb-6 justify-between">
                 {{-- Left Side: Search Items --}}
-                <div class="w-1/2">
+                <div class="w-full md:w-1/2">
                     <div>
                         <label for="itemSearch" class="block text-gray-700 text-sm font-bold mb-2">Search Item</label>
                         <input type="text" wire:model.live="itemSearch" id="itemSearch"
@@ -102,10 +102,10 @@
                     </div>
                 </div>
                 {{-- Right Side: Tax and Discount --}}
-                <div class="w-1/2">
-                    <div class="flex gap-4 justify-end">
+                <div class="w-full md:w-1/2">
+                    <div class="flex flex-col md:flex-row gap-4 justify-end">
                         {{-- Tax Rate --}}
-                        <div class="flex-1 max-w-[200px]">
+                        <div class="w-full md:flex-1 max-w-[200px]">
                             <label for="taxRate" class="block text-gray-700 text-sm font-bold mb-2">Tax Rate
                                 (%)</label>
                             <div class="flex items-center">
@@ -117,7 +117,7 @@
                         </div>
 
                         {{-- Discount Rate --}}
-                        <div class="flex-1 max-w-[200px]">
+                        <div class="w-full md:flex-1 max-w-[200px]">
                             <label for="discountRate" class="block text-gray-700 text-sm font-bold mb-2">Discount Rate
                                 (%)</label>
                             <div class="flex items-center">
@@ -129,7 +129,7 @@
                         </div>
 
                         {{-- Auto Create Requisition --}}
-                        <div class="flex-1 max-w-[200px]">
+                        <div class="w-full md:flex-1 max-w-[200px]">
                             <label for="createRequisition" class="block text-gray-700 text-sm font-bold mb-2">Auto Create Requisition</label>
                             <div class="flex items-center">
                                 <input type="checkbox" wire:model="createRequisition" id="createRequisition"
