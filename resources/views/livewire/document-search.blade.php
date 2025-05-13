@@ -48,6 +48,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document #</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">department</th> --}}
                     @if($documentType === 'receiving')
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tax</th>
@@ -61,7 +62,14 @@
                 <tr>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">
-                            {{ $document['receiving_number'] ?? $document['requisition_number'] ?? $document['trust_number'] ?? $document['transfer_number'] }}
+                            @php
+                                $docNumber = $document['receiving_number'] ?? $document['requisition_number'] ?? $document['trust_number'] ?? $document['transfer_number'];
+                                $docType = $document['document_type'];
+                            @endphp
+                            <a href="{{ route('transaction.details', ['type' => $docType, 'number' => $docNumber]) }}" 
+                               class="text-blue-600 hover:text-blue-800 hover:underline">
+                                {{ $docNumber }}
+                            </a>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -85,6 +93,11 @@
                             @endif
                         </div>
                     </td>
+                    {{-- <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <div class="text-sm text-gray-900">
+                            {{dd($document) }}
+                        </div>
+                    </td> --}}
                     @if($documentType === 'receiving')
                     <td class="px-6 py-4 whitespace-nowrap text-right">
                         <div class="text-sm text-gray-900">

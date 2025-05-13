@@ -9,7 +9,7 @@ class Trust extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['item_id', 'department_id', 'quantity', 'requested_by', 'requisition_number', 'status'];
+    protected $fillable = ['item_id', 'department_id', 'quantity', 'requested_by', 'requisition_number', 'status','requested_date'];
 
     public function item()
     {

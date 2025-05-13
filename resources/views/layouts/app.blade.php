@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ __('messages.direction') }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,6 +36,10 @@
                     </div>
                 </header>
             @endif
+            <!-- In your layout file -->
+<div class="language-switcher">
+    @livewire('language-switcher')
+</div>
 
             <!-- Page Content -->
             <main>

@@ -24,6 +24,8 @@ use App\Livewire\TrustSearch;
 use App\Livewire\DocumentSearch;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Livewire\Actions\Logout;
+use App\Http\Controllers\LocaleController;
+use App\Livewire\TransactionDetails;
 
 Route::view('/', 'welcome');
 
@@ -49,6 +51,9 @@ Route::get('management-suppliers', ManagementSuppliers::class)->name('management
 Route::get('/management-category', ManagementCategory::class)->name('management-category');
 Route::get('/management-subcategory', ManagementSubcategory::class)->name('management-subcategory');
 Route::get('backup-manager', BackupManager::class)->name('backup-manager');
+Route::get('change', [LocaleController::class, 'change'])->name("lang.change");
+Route::get('/transaction/{type}/{number}', App\Livewire\TransactionDetails::class)
+    ->name('transaction.details');
 // Authenticated Routes
 // Logout
 Route::get('logout', [Logout::class, '__invoke'])->name('logout');

@@ -28,6 +28,8 @@ class TrustSearch extends Component
 
     public $editingItemId = null;
     public $editingItem = [];
+    public $showDeleteConfirmation = false;
+    public $showDeleteItemConfirmation = null;
 
     public function mount()
     {
@@ -80,8 +82,8 @@ class TrustSearch extends Component
 
             if (!empty($this->trustItems)) {
                 $this->currentRequisitionNumber = $this->searchTrustNumber;
-                $this->date = $this->trustItems[0]['requested_date'] ?? now()->toDateString();
-                $this->selectedDepartmentId = $this->trustItems[0]['department']['id'];
+                $this->date = $this->trustItems[0]['requested_date'] ? date('Y-m-d', strtotime($this->trustItems[0]['requested_date'])) : now()->toDateString();
+                $this->selectedDepartmentId = $this->trustItems[0]['department']['id'] ?? null;
             }
         } else {
             $this->trustItems = [];
@@ -183,6 +185,100 @@ class TrustSearch extends Component
             })->toArray();
 
         $this->totalQuantity = collect($this->trustItems)->sum('quantity');
+    }
+
+    public function updateDateAndDepartment()
+    {
+        if (!$this->currentRequisitionNumber) {
+            session()->flash('error', 'No trust selected.');
+            return;
+        }
+
+        Trust::where('requisition_number', $this->currentRequisitionNumber)
+            ->update([
+                'requested_date' => $this->date,
+                'department_id' => $this->selectedDepartmentId
+            ]);
+
+        $this->refreshItems();
+        session()->flash('message', 'Date and department updated successfully.');
+    }
+
+    public function addNewItem()
+    {
+        if (!$this->currentRequisitionNumber) {
+            session()->flash('error', 'No trust selected.');
+            return;
+        }
+
+        if (!$this->selectedItemId) {
+            session()->flash('error', 'Please select an item to add.');
+            return;
+        }
+
+        // Check if item already exists in the trust
+        $existingItem = Trust::where('requisition_number', $this->currentRequisitionNumber)
+            ->where('item_id', $this->selectedItemId)
+            ->first();
+
+        if ($existingItem) {
+            session()->flash('error', 'This item already exists in the trust.');
+            return;
+        }
+
+        // Get the first item to copy some data
+        $firstItem = Trust::where('requisition_number', $this->currentRequisitionNumber)->first();
+
+        if (!$firstItem) {
+            session()->flash('error', 'Invalid trust.');
+            return;
+        }
+
+        // Create new trust item
+        Trust::create([
+            'item_id' => $this->selectedItemId,
+            'department_id' => $this->selectedDepartmentId,
+            'quantity' => 1, // Default quantity, can be edited
+            'requested_by' => $firstItem->requested_by,
+            'requisition_number' => $this->currentRequisitionNumber,
+            'status' => 'pending',
+            'requested_date' => $this->date,
+        ]);
+
+        $this->selectedItemId = null;
+        $this->itemSearch = '';
+        $this->refreshItems();
+        session()->flash('message', 'Item added to trust successfully.');
+    }
+
+    public function removeItem($itemId)
+    {
+        $trustItem = Trust::find($itemId);
+        if ($trustItem) {
+            $trustItem->delete();
+            $this->refreshItems();
+            $this->showDeleteItemConfirmation = null; // Reset the confirmation state
+            session()->flash('message', 'Item removed successfully.');
+        }else {
+            session()->flash('error', 'Item not found.');
+        }
+    }
+
+    public function removeAllItems()
+    {
+        if (!$this->currentRequisitionNumber) {
+            session()->flash('error', 'No trust selected.');
+            return;
+        }
+
+        Trust::where('requisition_number', $this->currentRequisitionNumber)->delete();
+        $this->trustItems = [];
+        $this->currentRequisitionNumber = null;
+        $this->searchTrustNumber = '';
+        $this->date = now()->toDateString();
+        $this->selectedDepartmentId = null;
+        
+        session()->flash('message', 'All items have been removed from the trust.');
     }
 
     public function render()

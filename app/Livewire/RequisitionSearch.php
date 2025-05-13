@@ -27,9 +27,22 @@ class RequisitionSearch extends Component
     public $units = [];
     public $items = [];
     public $itemSearch = '';
+    public $searchedItems = [];
 
     public $editingItemId = null;
     public $editingItem = [];
+    public $showDeleteConfirmation = false;
+    public $showDeleteItemConfirmation = null;
+    public $currentRequisitionNumber;
+    public $selectedItemId = null;
+
+    protected $rules = [
+        'editingItem.quantity' => 'required|numeric|min:0',
+        'editingItem.unit_id' => 'required|exists:units,id',
+        'editingItem.item_id' => 'required|exists:items,id',
+        'editingItem.department_id' => 'required|exists:departments,id',
+        'date' => 'required|date',
+    ];
 
     public $data = [
         'items' => [],
@@ -38,16 +51,21 @@ class RequisitionSearch extends Component
 
     public function mount()
     {
-        $this->items = Item::with(['subcategory', 'department', 'subcategory.category'])->get();
-        $this->units = Unit::all();
+        $this->items = Item::with(['subcategory', 'department', 'subcategory.category'])->get()->toArray();
+        $this->units = Unit::all()->toArray();
         $this->requisitions = Requisition::with(['item', 'unit'])->get();
         $this->departments = Department::all()->toArray();
         $this->date = now()->toDateString();
     }
 
-    public function updatedItemSearch()
+    public function updatedItemSearch($value)
     {
-        $this->items = $this->searchItems($this->itemSearch, 10);
+        if (empty($value)) {
+            $this->searchedItems = [];
+            return;
+        }
+        
+        $this->searchedItems = $this->searchItems($value, 10);
     }
 
     // Multiple requisition search
@@ -81,8 +99,8 @@ class RequisitionSearch extends Component
     public function searchRequisition()
     {
         if ($this->searchRequisitionNumber) {
-            $this->requisitionItems = Requisition::with(['item', 'unit'])
-                ->where('requisition_number', $this->searchRequisitionNumber)
+            $this->requisitionItems = Requisition::where('requisition_number', $this->searchRequisitionNumber)
+                ->with(['item', 'department', 'unit'])
                 ->get()
                 ->map(function ($item) {
                     return [
@@ -90,10 +108,23 @@ class RequisitionSearch extends Component
                         'item' => $item->item,
                         'quantity' => $item->quantity,
                         'unit' => $item->unit,
+                        'department' => $item->department,
+                        'status' => $item->status,
+                        'requested_date' => $item->requested_date,
+                        'note' => $item->note,
                     ];
                 })->toArray();
+
+            if (!empty($this->requisitionItems)) {
+                $this->currentRequisitionNumber = $this->searchRequisitionNumber;
+                $this->date = $this->requisitionItems[0]['requested_date'] ? date('Y-m-d', strtotime($this->requisitionItems[0]['requested_date'])) : now()->toDateString();
+                $this->selectedDepartmentId = $this->requisitionItems[0]['department']['id'] ?? null;
+            }
         } else {
             $this->requisitionItems = [];
+            $this->date = now()->toDateString();
+            $this->selectedDepartmentId = null;
+            $this->currentRequisitionNumber = null;
         }
     }
 
@@ -179,10 +210,129 @@ class RequisitionSearch extends Component
         $this->data['total_quantity'] = collect($this->data['items'])->sum('quantity');
     }
 
+    public function updateDateAndDepartment()
+    {
+        if (!$this->currentRequisitionNumber) {
+            session()->flash('error', 'No requisition selected.');
+            return;
+        }
+
+        $validated = $this->validate([
+            'date' => 'required|date',
+            'selectedDepartmentId' => 'required|exists:departments,id',
+        ]);
+
+        Requisition::where('requisition_number', $this->currentRequisitionNumber)
+            ->update([
+                'requested_date' => $validated['date'],
+                'department_id' => $validated['selectedDepartmentId']
+            ]);
+
+
+        $this->searchRequisition();
+        session()->flash('message', 'Date and department updated successfully.');
+    }
+
+    public function addNewItem()
+    {
+        if (!$this->currentRequisitionNumber) {
+            session()->flash('error', 'No requisition selected.');
+            return;
+        }
+
+        if (!$this->selectedItemId) {
+            session()->flash('error', 'Please select an item to add.');
+            return;
+        }
+
+        // Check if item already exists in the requisition
+        $existingItem = Requisition::where('requisition_number', $this->currentRequisitionNumber)
+            ->where('item_id', $this->selectedItemId)
+            ->first();
+
+        if ($existingItem) {
+            session()->flash('error', 'This item already exists in the requisition.');
+            return;
+        }
+
+        // Get the first item to copy some data
+        $firstItem = Requisition::where('requisition_number', $this->currentRequisitionNumber)->first();
+
+        if (!$firstItem) {
+            session()->flash('error', 'Invalid requisition.');
+            return;
+        }
+
+        // Create new requisition item
+        Requisition::create([
+            'item_id' => $this->selectedItemId,
+            'department_id' => $this->selectedDepartmentId,
+            'quantity' => 1, // Default quantity, can be edited
+            'unit_id' => 1, // Default unit, should be set based on item
+            'requested_date' => $this->date,
+            'requisition_number' => $this->currentRequisitionNumber,
+            'status' => 'pending',
+            'note' => 'Added via update',
+        ]);
+
+        $this->selectedItemId = null;
+        $this->itemSearch = '';
+        $this->searchRequisition();
+        session()->flash('message', 'Item added to requisition successfully.');
+    }
+
+    public function removeItem($itemId)
+    {
+        $requisitionItem = Requisition::find($itemId);
+        if ($requisitionItem) {
+            $requisitionItem->delete();
+            $this->searchRequisition();
+            $this->showDeleteItemConfirmation = null;
+            session()->flash('message', 'Item removed successfully.');
+        } else {
+            session()->flash('error', 'Item not found.');
+        }
+    }
+
+    public function removeAllItems()
+    {
+        if (!$this->currentRequisitionNumber) {
+            session()->flash('error', 'No requisition selected.');
+            return;
+        }
+
+        Requisition::where('requisition_number', $this->currentRequisitionNumber)->delete();
+        $this->requisitionItems = [];
+        $this->currentRequisitionNumber = null;
+        $this->searchRequisitionNumber = '';
+        $this->date = now()->toDateString();
+        $this->selectedDepartmentId = null;
+        
+        session()->flash('message', 'All items have been removed from the requisition.');
+    }
+
     private function calculateTotals()
     {
         $this->totalQuantity = collect($this->requisitions)
             ->sum('total_quantity');
+    }
+
+    public function selectItem($itemId)
+    {
+        $this->selectedItemId = $itemId;
+        $selectedItem = collect($this->items)->firstWhere('id', $itemId);
+        if ($selectedItem) {
+            $this->itemSearch = $selectedItem['name'];
+            $this->searchedItems = [];
+        }
+    }
+
+    public function selectFirstItem()
+    {
+        if (!empty($this->searchedItems)) {
+            $firstItem = $this->searchedItems->first();
+            $this->selectItem($firstItem['id']);
+        }
     }
 
     public function render()

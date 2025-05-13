@@ -70,7 +70,12 @@
                                     @forelse($receivings as $receiving)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $receiving->received_at ? $receiving->received_at->format('d/m/Y') : '-' }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ $receiving->receiving_number ?? '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <a href="{{ route('transaction.details', ['type' => 'receiving', 'number' => $receiving->receiving_number]) }}" 
+                                                   class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                    {{ $receiving->receiving_number ?? '-' }}
+                                                </a>
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $receiving->item->name ?? '-' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $receiving->supplier->name ?? '-' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $receiving->quantity ?? 0 }}</td>
@@ -117,7 +122,12 @@
                                     @forelse($requisitions as $requisition)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $requisition->requested_date ? $requisition->requested_date->format('d/m/Y') : '-' }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ $requisition->requisition_number ?? '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <a href="{{ route('transaction.details', ['type' => 'requisition', 'number' => $requisition->requisition_number]) }}" 
+                                                   class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                    {{ $requisition->requisition_number ?? '-' }}
+                                                </a>
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $requisition->item->name ?? '-' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $requisition->requester->name ?? '-' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $requisition->quantity ?? 0 }}</td>

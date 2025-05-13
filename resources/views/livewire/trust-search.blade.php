@@ -33,19 +33,89 @@
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-gray-700 text-sm font-bold mb-2">Requested Date</label>
-                            <input type="date" wire:model="date" value="{{ $date }}"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <div class="flex gap-2">
+                                <input type="date" wire:model="date" 
+                                    value="{{ $date }}"
+                                    class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline flex-1"
+                                    required>
+                                <button wire:click="updateDateAndDepartment" 
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                    Update
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-gray-700 text-sm font-bold mb-2">Department</label>
-                            <select wire:model="selectedDepartmentId" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <option value="">Select Department</option>
-                                @foreach($departments as $department)
-                                    <option value="{{ $department['id'] }}">{{ $department['name'] }}</option>
-                                @endforeach
-                            </select>
+                            <div class="flex gap-2">
+                                <select wire:model="selectedDepartmentId" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option value="">Select Department</option>
+                                    @foreach($departments as $department)
+                                        <option value="{{ $department['id'] }}">{{ $department['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Add New Item Section -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-3">Add New Item</h3>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <input type="text" wire:model.live="itemSearch" 
+                                        class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 p-2"
+                                        placeholder="Search item by code or name...">
+                                    @if(!empty($itemSearch) && !empty($searchedItems))
+                                        <div class="absolute z-10 w-full bg-white border rounded shadow-lg max-h-60 overflow-auto mt-1">
+                                            @foreach($searchedItems as $searchedItem)
+                                                <div wire:click="$set('selectedItemId', {{ $searchedItem['id'] }}); $set('itemSearch', '{{ $searchedItem['name'] }}')"
+                                                    class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-0">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-1">
+                                                            <div class="font-medium">{{ $searchedItem['name'] }}</div>
+                                                            <div class="text-sm text-gray-500">{{ $searchedItem['code'] }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <button wire:click="addNewItem" 
+                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline self-start">
+                                Add Item
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remove All Button -->
+                    <div class="flex justify-end mb-4">
+                        <button wire:click="$set('showDeleteConfirmation', true)" 
+                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Remove All Items
+                        </button>
+                    </div>
+
+                    @if($showDeleteConfirmation ?? false)
+                        <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                            <div class="bg-white p-6 rounded-lg shadow-xl">
+                                <h3 class="text-lg font-semibold mb-4">Confirm Deletion</h3>
+                                <p class="mb-4">Are you sure you want to remove all items from this trust? This action cannot be undone.</p>
+                                <div class="flex justify-end gap-2">
+                                    <button wire:click="$set('showDeleteConfirmation', false)" 
+                                            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                        Cancel
+                                    </button>
+                                    <button wire:click="removeAllItems; $set('showDeleteConfirmation', false)" 
+                                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                        Remove All
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     <table class="min-w-full bg-white border">
                         <thead class="bg-gray-100">
@@ -157,12 +227,35 @@
                                             <button wire:click="cancelEdit" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
                                         @else
                                             <button wire:click="editItem({{ $item['id'] }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Edit</button>
+                                            <button wire:click="$set('showDeleteItemConfirmation', {{ $item['id'] }})" 
+                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                                Remove
+                                            </button>
                                         @endif
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+
+                    @if(isset($showDeleteItemConfirmation))
+                        <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                            <div class="bg-white p-6 rounded-lg shadow-xl">
+                                <h3 class="text-lg font-semibold mb-4">Confirm Deletion</h3>
+                                <p class="mb-4">Are you sure you want to remove this item from the trust?</p>
+                                <div class="flex justify-end gap-2">
+                                    <button wire:click="$set('showDeleteItemConfirmation', null)" 
+                                            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                        Cancel
+                                    </button>
+                                    <button wire:click="removeItem({{ $showDeleteItemConfirmation }}); $set('showDeleteItemConfirmation', null)" 
+                                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>

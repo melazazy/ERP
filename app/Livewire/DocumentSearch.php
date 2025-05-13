@@ -50,6 +50,7 @@ class DocumentSearch extends Component
             ->selectRaw('
                 requisition_number,
                 requested_date,
+                department_id,
                 "requisition" as document_type
             ')
             ->distinct('requisition_number')

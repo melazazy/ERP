@@ -122,6 +122,14 @@ new class extends Component {
                 </div>
             </div>
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <div class="ml-4">
+                    <a href="{{ route('lang.change') }}?lang=en" class="text-sm text-gray-700 dark:text-gray-500 underline">
+                        English
+                    </a>
+                    <a href="{{ route('lang.change') }}?lang=ar" class="text-sm text-gray-700 dark:text-gray-500 underline">
+                        العربية
+                    </a>
+                </div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
