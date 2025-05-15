@@ -1,5 +1,5 @@
 <div class="container mx-auto mt-5">
-    <h1 class="text-3xl font-bold mb-6 text-center">Add Requisitions</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">{{ __('messages.add_requisitions') }}</h1>
 
     <!-- Display Error/Success Messages -->
     @if (session()->has('error'))
@@ -19,19 +19,18 @@
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
             <!-- Requisition Number -->
             <div>
-                <label for="requisitionNumber" class="block text-gray-700 text-sm font-bold mb-2">Requisition
-                    Number</label>
+                <label for="requisitionNumber" class="block text-gray-700 text-sm font-bold mb-2 text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.requisition_number') }}</label>
                 <input type="text" id="requisitionNumber" wire:model="requisitionNumber"
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Requisition Number">
+                    placeholder="{{ __('messages.requisition_number_placeholder') }}">
             </div>
 
             <!-- Department Search -->
             <div>
-                <label for="departmentSearch" class="block text-gray-700 text-sm font-bold mb-2">Department</label>
+                <label for="departmentSearch" class="block text-gray-700 text-sm font-bold mb-2 text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.department') }}</label>
                 <input type="text" wire:model.live="departmentSearch" id="departmentSearch"
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Search Department">
+                    placeholder="{{ __('messages.search_department') }}">
                 @if (!empty($departments))
                     <!-- Show the list only if $departments is not empty -->
                     <ul class="mt-2 bg-white border border-gray-300 rounded-lg shadow-md max-h-40 overflow-y-auto">
@@ -47,10 +46,10 @@
 
             <!-- Requested By Search -->
             <div>
-                <label for="requestedBySearch" class="block text-gray-700 text-sm mb-2">(Optional) Requested By</label>
+                <label for="requestedBySearch" class="block text-gray-700 text-sm mb-2 text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.optional_requested_by') }}</label>
                 <input type="text" wire:model.live="requestedBySearch" id="requestedBySearch"
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Search User (Optional)">
+                    placeholder="{{ __('messages.search_user_optional') }}">
                 @if (!empty($users))
                     <!-- Show the list only if $users is not empty -->
                     <ul class="mt-2 bg-white border border-gray-300 rounded-lg shadow-md max-h-40 overflow-y-auto">
@@ -64,9 +63,9 @@
                 @endif
             </div>
           
-               {{-- Date --}}
-               <div class="flex-1 min-w-[200px]">
-                <label for="date" class="block text-gray-700 text-sm font-bold mb-2">Date</label>
+            {{-- Date --}}
+            <div class="flex-1 min-w-[200px]">
+                <label for="date" class="block text-gray-700 text-sm font-bold mb-2 text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.date') }}</label>
                 <input type="date" id="date" wire:model="date"
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
@@ -74,10 +73,10 @@
 
         <!-- Item Search -->
         <div class="mb-6">
-            <label for="itemSearch" class="block text-gray-700 text-sm font-bold mb-2">Search Item</label>
+            <label for="itemSearch" class="block text-gray-700 text-sm font-bold mb-2 text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.search_item') }}</label>
             <input type="text" id="itemSearch" wire:model.live="itemSearch"
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Search by item name or code"  wire:keydown.enter.prevent="selectFirstItem">
+                placeholder="{{ __('messages.search_by_item_name_or_code') }}" wire:keydown.enter.prevent="selectFirstItem">
             @if (!empty($items))
                 <!-- Show the list only if $items is not empty -->
                 <ul class="mt-2 bg-white border border-gray-300 rounded-lg shadow-md max-h-40 overflow-y-auto">
@@ -97,49 +96,49 @@
                 <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
                     <thead class="bg-gray-200">
                         <tr>
-                            <th class="py-3 px-4 border text-left">ID</th>
-                            <th class="py-3 px-4 border-b text-left">Item</th>
-                            <th class="py-3 px-4 border-b text-left">Code</th>
-                            <th class="py-3 px-4 border-b text-left">Quantity</th>
-                            <th class="py-3 px-4 border-b text-left">Possible Amount</th>
-                            <th class="py-3 px-4 border-b text-left">Action</th>
+                            <th class="py-3 px-4 border text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.id') }}</th>
+                            <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.item') }}</th>
+                            <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.code') }}</th>
+                            <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.quantity') }}</th>
+                            <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.possible_amount') }}</th>
+                            <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($selectedItems as $index => $item)
                             <tr class="hover:bg-gray-50">
-                                <td class="py-2 px-4 border-b text-left">{{ $index + 1 }}</td>
-                                <td class="py-2 px-4 border-b text-left" dir="rtl">
+                                <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ $index + 1 }}</td>
+                                <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}" dir="rtl">
                                     <div class="flex items-center">
-                                        <span class="block md:hidden">Item:</span>
+                                        <span class="block md:hidden">{{ __('messages.item') }}:</span>
                                         {{ $item['name'] }}
                                     </div>
                                 </td>
-                                <td class="py-2 px-4 border-b text-left">
+                                <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                     <div class="flex items-center">
-                                        <span class="block md:hidden">Code:</span>
+                                        <span class="block md:hidden">{{ __('messages.code') }}:</span>
                                         {{ $item['code'] }}
                                     </div>
                                 </td>
-                                <td class="py-2 px-4 border-b">
+                                <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                     <div class="flex items-center">
-                                        <span class="block md:hidden">Qty:</span>
+                                        <span class="block md:hidden">{{ __('messages.qty') }}:</span>
                                         <input type="number" step="0.0001" wire:model="selectedItems.{{ $index }}.quantity"
                                             class="w-20 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                 </td>
-                                <td class="py-2 px-4 border-b">
+                                <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                     <div class="flex items-center">
-                                        <span class="block md:hidden">Possible:</span>
+                                        <span class="block md:hidden">{{ __('messages.possible') }}:</span>
                                         <span>{{ $item['possible_amount'] }}</span>
                                     </div>
                                 </td>
-                                <td class="py-2 px-4 border-b">
+                                <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                     <div class="flex items-center">
                                         <button type="button" wire:click="removeSelectedItem({{ $index }})"
                                             class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                                            <span class="block md:hidden">Remove</span>
-                                            <span class="hidden md:block">Remove Item</span>
+                                            <span class="block md:hidden">{{ __('messages.remove') }}</span>
+                                            <span class="hidden md:block">{{ __('messages.remove_item') }}</span>
                                         </button>
                                     </div>
                                 </td>
@@ -154,7 +153,7 @@
         <div class="flex justify-end">
             <button type="submit"
                 class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-                Save Requisition
+                {{ __('messages.save_requisition') }}
             </button>
         </div>
     </form>
@@ -162,13 +161,13 @@
 <script>
     function confirmDeleteRequisition(requisitionId) {
         Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            title: '{{ __('messages.are_you_sure') }}',
+            text: "{{ __('messages.cannot_revert') }}",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: '{{ __('messages.yes_delete') }}'
         }).then((result) => {
             if (result.isConfirmed) {
                 Livewire.dispatch('deleteRequisition', {

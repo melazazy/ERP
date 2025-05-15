@@ -36,10 +36,6 @@
                     </div>
                 </header>
             @endif
-            <!-- In your layout file -->
-<div class="language-switcher">
-    @livewire('language-switcher')
-</div>
 
             <!-- Page Content -->
             <main>

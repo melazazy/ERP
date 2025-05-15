@@ -15,7 +15,7 @@ new class extends Component {
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -32,7 +32,7 @@ new class extends Component {
                     <x-dropdown align="left" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('Inventory') }}</div>
+                                <div>{{ __('messages.inventory') }}</div>
                                 <div class="ms-1">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -42,16 +42,16 @@ new class extends Component {
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('receiving')" wire:navigate>
-                                {{ __('Receiving') }}
+                                {{ __('messages.receiving') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('requisition')" wire:navigate>
-                                {{ __('Requisition') }}
+                                {{ __('messages.requisition') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('transfer')" wire:navigate>
-                                {{ __('Transfer') }}
+                                {{ __('messages.transfer') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('trusts')" wire:navigate>
-                                {{ __('Trusts') }}
+                                {{ __('messages.trusts') }}
                             </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
@@ -60,7 +60,7 @@ new class extends Component {
                     <x-dropdown align="left" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('Items') }}</div>
+                                <div>{{ __('messages.items') }}</div>
                                 <div class="ms-1">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -70,13 +70,13 @@ new class extends Component {
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('item-card')" wire:navigate>
-                                {{ __('Item Card') }}
+                                {{ __('messages.item_card') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('item-monitor')" wire:navigate>
-                                {{ __('Item Monitor') }}
+                                {{ __('messages.item_monitor') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('item-report')" wire:navigate>
-                                {{ __('Item Report') }}
+                                {{ __('messages.item_report') }}
                             </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
@@ -85,7 +85,7 @@ new class extends Component {
                     <x-dropdown align="left" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('Reports') }}</div>
+                                <div>{{ __('messages.reports') }}</div>
                                 <div class="ms-1">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -95,26 +95,26 @@ new class extends Component {
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('receiving-search')" wire:navigate>
-                                {{ __('Receiving Search') }}
+                                {{ __('messages.receiving_search') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('requisition-search')" wire:navigate>
-                                {{ __('Requisition Search') }}
+                                {{ __('messages.requisition_search') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('trust-search')" wire:navigate>
-                                {{ __('Trust Search') }}
+                                {{ __('messages.trust_search') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('export-reports')" wire:navigate>
-                                {{ __('Export Reports') }}
+                                {{ __('messages.export_reports') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('inventory-reports')" wire:navigate>
-                                {{ __('Inventory Reports') }}
+                                {{ __('messages.inventory_reports') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('department-reports')" wire:navigate>
-                                {{ __('Department Report') }}
+                                {{ __('messages.department_report') }}
                             </x-dropdown-link>
                             {{-- document search --}}
                             <x-dropdown-link :href="route('document-search')" wire:navigate>
-                                {{ __('Document Search') }}
+                                {{ __('messages.document_search') }}
                             </x-dropdown-link>
 
                         </x-slot>
@@ -122,19 +122,13 @@ new class extends Component {
                 </div>
             </div>
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <div class="ml-4">
-                    <a href="{{ route('lang.change') }}?lang=en" class="text-sm text-gray-700 dark:text-gray-500 underline">
-                        English
-                    </a>
-                    <a href="{{ route('lang.change') }}?lang=ar" class="text-sm text-gray-700 dark:text-gray-500 underline">
-                        العربية
-                    </a>
-                </div>
+                <!-- Language Switcher -->
+                <livewire:language-switcher />
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
                             class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            {{ __('Management') }}
+                            {{ __('messages.management') }}
                             <svg class="fill-current h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -145,28 +139,28 @@ new class extends Component {
                     </x-slot>
                     <x-slot name="content">
                         <x-dropdown-link :href="route('management.items')" wire:navigate>
-                            {{ __('Items') }}
+                            {{ __('messages.items') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('management.users')" wire:navigate>
-                            {{ __('Users') }}
+                            {{ __('messages.users') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('management.departments')" wire:navigate>
-                            {{ __('Departments') }}
+                            {{ __('messages.departments') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('management.suppliers')" wire:navigate>
-                            {{ __('Suppliers') }}
+                            {{ __('messages.suppliers') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('management-category')" wire:navigate>
-                            {{ __('Categories') }}
+                            {{ __('messages.categories') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('management-subcategory')" wire:navigate>
-                            {{ __('Subcategories') }}
+                            {{ __('messages.subcategories') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('backup-manager')" wire:navigate>
-                            {{ __('Backup Manager') }}
+                            {{ __('messages.backup_manager') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('logout')">
-                            {{ __('Logout') }}
+                            {{ __('messages.logout') }}
                         </x-dropdown-link>
                     </x-slot>
                 </x-dropdown>
