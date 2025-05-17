@@ -154,13 +154,59 @@
                                 @foreach($requisitionItems as $item)
                                     <tr>
                                         <td class="py-2 px-4 border">
-                                            {{ $item['item']['name'] ?? 'N/A' }}
+                                            @if($editingItemId === $item['id'])
+                                                <div>
+                                                    <input type="text" 
+                                                           wire:model.live="itemSearch" 
+                                                           class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                           placeholder="{{ __('messages.search_by_code_or_name') }}">
+                                                    @if (!empty($searchedItems))
+                                                        <ul class="mt-2 bg-white border border-gray-300 rounded-lg shadow-md max-h-40 overflow-y-auto absolute z-50">
+                                                            @foreach ($searchedItems as $searchedItem)
+                                                                <li wire:click="selectEditingItem({{ $searchedItem['id'] }})"
+                                                                    class="px-4 py-2 hover:bg-blue-100 cursor-pointer">
+                                                                    {{ $searchedItem['name'] }} - {{ $searchedItem['code'] }}
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                {{ $item['item']['name'] ?? 'N/A' }}
+                                                @if(isset($item['item']['code']))
+                                                    <div class="text-sm text-gray-500">{{ $item['item']['code'] }}</div>
+                                                @endif
+                                            @endif
                                         </td>
                                         <td class="py-2 px-4 border text-center">
-                                            {{ $item['quantity'] }}
+                                            @if($editingItemId === $item['id'])
+                                                <input type="number" 
+                                                       wire:model="editingItem.quantity" 
+                                                       step="0.0001"
+                                                       class="w-24 text-right border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            @else
+                                                <div class="flex items-center justify-between">
+                                                    <span>{{ number_format($item['quantity'] ?? 0, 2) }}</span>
+                                                    <button wire:click="editItem({{ $item['id'] }})" 
+                                                            class="text-blue-600 hover:text-blue-800">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="py-2 px-4 border">
-                                            {{ $item['unit']['name'] ?? 'N/A' }}
+                                            @if($editingItemId === $item['id'])
+                                                <select wire:model="editingItem.unit_id"
+                                                        class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    @foreach($units as $unit)
+                                                        <option value="{{ $unit['id'] }}">{{ $unit['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @else
+                                                {{ $item['unit']['name'] ?? 'N/A' }}
+                                            @endif
                                         </td>
                                         <td class="py-2 px-4 border">
                                             {{ $item['department']['name'] ?? 'N/A' }}
@@ -174,16 +220,31 @@
                                             </span>
                                         </td>
                                         <td class="py-2 px-4 border">
-                                            <div class="flex gap-2">
-                                                <button wire:click="editItem({{ $item['id'] }})" 
-                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">
-                                                    Edit
-                                                </button>
-                                                <button wire:click="$set('showDeleteItemConfirmation', {{ $item['id'] }})" 
-                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs">
-                                                    Remove
-                                                </button>
-                                            </div>
+                                            @if($editingItemId === $item['id'])
+                                                <div class="flex gap-2">
+                                                    <button wire:click="saveItemChanges" 
+                                                            class="text-green-600 hover:text-green-800">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                    </button>
+                                                    <button wire:click="cancelEdit" 
+                                                            class="text-red-600 hover:text-red-800">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @else
+                                                <div class="flex gap-2">
+                                                    <button wire:click="$set('showDeleteItemConfirmation', {{ $item['id'] }})" 
+                                                            class="text-red-600 hover:text-red-800">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

@@ -196,6 +196,13 @@ class RequisitionSearch extends Component
         $this->editingItem = [];
     }
 
+    public function selectEditingItem($itemId)
+    {
+        $this->editingItem['item_id'] = $itemId;
+        $this->itemSearch = ''; // Clear the search after selection
+        $this->searchedItems = []; // Clear search results
+    }
+
     public function refreshItems()
     {
         $this->data['items'] = Requisition::with(['item', 'unit'])->get()->map(function ($item) {
