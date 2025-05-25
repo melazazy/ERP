@@ -116,6 +116,9 @@ new class extends Component {
                             <x-dropdown-link :href="route('document-search')" wire:navigate>
                                 {{ __('messages.document_search') }}
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('supplier-reports')" wire:navigate>
+                                {{ __('messages.supplier_report') }}
+                            </x-dropdown-link>
 
                         </x-slot>
                     </x-dropdown>

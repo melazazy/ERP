@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Receiving;
+use App\Models\Trust;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, ShouldAutoSize
+class TrustsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, ShouldAutoSize
 {
     protected $data;
 
@@ -28,33 +28,31 @@ class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, Wit
         return $this->data;
     }
 
-    public function map($receiving): array
+    public function map($trust): array
     {
         return [
-            $receiving->receiving_number,
-            $receiving->item->name,
-            $receiving->quantity,
-            $receiving->unit->name,
-            number_format($receiving->unit_price, 2),
-            number_format($receiving->quantity * $receiving->unit_price, 2),
-            $receiving->supplier->name,
-            $receiving->department->name,
-            \Carbon\Carbon::parse($receiving->received_at)->format('Y-m-d'),
+            $trust->requisition_number,
+            $trust->item->name,
+            $trust->item->code,
+            $trust->quantity,
+            $trust->department->name,
+            $trust->user->name,
+            __('messages.' . $trust->status),
+            \Carbon\Carbon::parse($trust->requested_date)->format('Y-m-d'),
         ];
     }
 
     public function headings(): array
     {
         return [
-            __('messages.receiving_number'),
+            __('messages.requisition_number'),
             __('messages.item'),
+            __('messages.item_code'),
             __('messages.quantity'),
-            __('messages.unit'),
-            __('messages.unit_price'),
-            __('messages.total'),
-            __('messages.supplier'),
             __('messages.department'),
-            __('messages.date'),
+            __('messages.requested_by'),
+            __('messages.status'),
+            __('messages.requested_date'),
         ];
     }
 
@@ -64,7 +62,7 @@ class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, Wit
         $lastRow = $sheet->getHighestRow();
         
         // Style for headers
-        $sheet->getStyle('A1:I1')->applyFromArray([
+        $sheet->getStyle('A1:H1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -80,7 +78,7 @@ class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, Wit
         ]);
 
         // Style for data cells
-        $sheet->getStyle('A2:I'.$lastRow)->applyFromArray([
+        $sheet->getStyle('A2:H'.$lastRow)->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
@@ -93,10 +91,24 @@ class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, Wit
             ],
         ]);
 
+        // Status column styling
+        $sheet->getStyle('G2:G'.$lastRow)->applyFromArray([
+            'font' => [
+                'bold' => true,
+            ],
+        ]);
+
+        // Item code styling
+        $sheet->getStyle('C2:C'.$lastRow)->applyFromArray([
+            'font' => [
+                'name' => 'Consolas',
+            ],
+        ]);
+
         // Alternate row colors
         for ($row = 2; $row <= $lastRow; $row++) {
             if ($row % 2 == 0) {
-                $sheet->getStyle('A'.$row.':I'.$row)->applyFromArray([
+                $sheet->getStyle('A'.$row.':H'.$row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F8F9FA'],
@@ -110,7 +122,7 @@ class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, Wit
         $sheet->getRowDimension(1)->setRowHeight(25);
 
         // Auto-fit columns
-        foreach (range('A', 'I') as $column) {
+        foreach (range('A', 'H') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
@@ -122,15 +134,14 @@ class ReceivingsExport implements FromCollection, WithHeadings, WithMapping, Wit
     public function columnWidths(): array
     {
         return [
-            'A' => 15, // Receiving Number
-            'B' => 30, // Item
-            'C' => 10, // Quantity
-            'D' => 10, // Unit
-            'E' => 15, // Unit Price
-            'F' => 15, // Total
-            'G' => 25, // Supplier
-            'H' => 25, // Department
-            'I' => 15, // Date
+            'A' => 15, // Requisition Number
+            'B' => 30, // Item Name
+            'C' => 15, // Item Code
+            'D' => 10, // Quantity
+            'E' => 25, // Department
+            'F' => 25, // Requested By
+            'G' => 15, // Status
+            'H' => 15, // Requested Date
         ];
     }
 }

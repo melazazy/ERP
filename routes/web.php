@@ -22,6 +22,7 @@ use App\Livewire\TransferForm;
 use App\Livewire\DepartmentReport;
 use App\Livewire\TrustSearch;
 use App\Livewire\DocumentSearch;
+use App\Livewire\SupplierReport;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Livewire\Actions\Logout;
 use App\Http\Controllers\LocaleController;
@@ -44,6 +45,7 @@ Route::get('requisition-search', RequisitionSearch::class)->name('requisition-se
 Route::get('trust-search', TrustSearch::class)->name('trust-search');
 Route::get('inventory-reports', InventoryReports::class)->name('inventory-reports');
 Route::get('department-reports', DepartmentReport::class)->name('department-reports');
+Route::get('supplier-reports', SupplierReport::class)->name('supplier-reports');
 Route::get('management-items', ManagementItems::class)->name('management.items');
 Route::get('management-users', ManagementUsers::class)->name('management.users');
 Route::get('management-departments', ManagementDepartments::class)->name('management.departments');

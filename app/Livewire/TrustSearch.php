@@ -39,29 +39,70 @@ class TrustSearch extends Component
         $this->date = now()->toDateString();
     }
 
-    public function updatedItemSearch()
-    {
-        if (strlen($this->itemSearch) >= 2 && $this->currentRequisitionNumber) {
-            $this->searchedItems = Trust::where('requisition_number', $this->currentRequisitionNumber)
-                ->whereHas('item', function ($query) {
-                    $query->where('code', 'like', '%' . $this->itemSearch . '%')
-                        ->orWhere('name', 'like', '%' . $this->itemSearch . '%');
-                })
-                ->with(['item' => function ($query) {
-                    $query->with(['subcategory', 'department', 'subcategory.category']);
-                }])
+// public function updatedItemSearch()
+// {
+//     if (strlen($this->itemSearch) >= 2 && $this->currentRequisitionNumber) {
+//         $this->searchedItems = Trust::where('requisition_number', $this->currentRequisitionNumber)
+//             ->whereHas('item', function ($query) {
+//                 $query->where('code', 'like', '%' . $this->itemSearch . '%')
+//                     ->orWhere('name', 'like', '%' . $this->itemSearch . '%');
+//             })
+//             ->with(['item' => function ($query) {
+//                 $query->with(['subcategory', 'department', 'subcategory.category']);
+//             }])
+//             ->get()
+//             ->map(function ($trust) {
+//                 return $trust->item;
+//             })
+//             ->unique('id')
+//             ->take(10)
+//             ->toArray();
+//     } else {
+//         $this->searchedItems = [];
+//     }
+// }
+public function updatedItemSearch($value)
+{
+    if (strlen($value) >= 2) {
+        // First get basic item info using the trait
+        $baseItems = $this->searchItems($value, 10);
+        
+        if (!empty($baseItems)) {
+            // Get full item details with relationships
+            $itemIds = collect($baseItems)->pluck('id');
+            
+            $this->searchedItems = Item::whereIn('id', $itemIds)
+                ->with(['subcategory', 'department', 'subcategory.category'])
                 ->get()
-                ->map(function ($trust) {
-                    return $trust->item;
+                ->map(function($item) use ($baseItems) {
+                    $baseItem = collect($baseItems)->firstWhere('id', $item->id);
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'code' => $item->code,
+                        'available_quantity' => $baseItem['available_quantity'] ?? 0,
+                        'subcategory' => $item->subcategory ? [
+                            'id' => $item->subcategory->id,
+                            'name' => $item->subcategory->name,
+                            'category' => $item->subcategory->category ? [
+                                'id' => $item->subcategory->category->id,
+                                'name' => $item->subcategory->category->name
+                            ] : null
+                        ] : null,
+                        'department' => $item->department ? [
+                            'id' => $item->department->id,
+                            'name' => $item->department->name
+                        ] : null
+                    ];
                 })
-                ->unique('id')
-                ->take(10)
                 ->toArray();
         } else {
             $this->searchedItems = [];
         }
+    } else {
+        $this->searchedItems = [];
     }
-
+}
     public function searchTrust()
     {
         if ($this->searchTrustNumber) {
@@ -109,6 +150,21 @@ class TrustSearch extends Component
             $this->editingItem['item_name'] = $item->item->name;
             $this->editingItem['item_code'] = $item->item->code;
             $this->itemSearch = $item->item->name;
+            $this->searchedItems = [];
+        }
+    }
+
+    public function selectEditingItem($itemId)
+    {
+        $item = Item::with(['subcategory', 'department', 'subcategory.category'])
+            ->find($itemId);
+
+        if ($item) {
+            $this->selectedItemId = $itemId;
+            $this->editingItem['item_id'] = $itemId;
+            $this->editingItem['item_name'] = $item->name;
+            $this->editingItem['item_code'] = $item->code;
+            $this->itemSearch = $item->name;
             $this->searchedItems = [];
         }
     }

@@ -42,6 +42,12 @@ class TrustForm extends Component
     {
         $this->date = now()->toDateString();
         $this->refreshTrusts();
+        $this->searchAllItems();
+    }
+
+    public function searchAllItems()
+    {
+        $this->items = $this->searchItems('', 100); // Show first 100 items when empty search
     }
 
     public function addTrust()
@@ -123,9 +129,13 @@ class TrustForm extends Component
         $this->users = [];  // Clear search results
     }
 
-    public function updatedItemSearch()
+    public function updatedItemSearch($value)
     {
-        $this->items = $this->searchItems($this->itemSearch, 10);
+        if (empty($value)) {
+            $this->searchAllItems();
+        } else {
+            $this->items = $this->searchItems($value, 10);
+        }
     }
 
     public function updatedDepartmentSearch($value)
@@ -139,18 +149,30 @@ class TrustForm extends Component
 
     public function selectItem($itemId)
     {
-        $item = Item::find($itemId);
+        $item = collect($this->items)->firstWhere('id', $itemId);
         if ($item) {
+            // Check if the item is already in the selected items
+            if (collect($this->selectedItems)->contains('id', $itemId)) {
+                session()->flash('error', __('messages.item_already_added'));
+                return;
+            }
+            
+            // Check if item is out of stock
+            if ($item['available_quantity'] <= 0) {
+                session()->flash('error', __('messages.item_out_of_stock'));
+                return;
+            }
+            
             // Add the item to the selected items list
             $this->selectedItems[] = [
-                'id' => $item->id,
-                'name' => $item->name,
-                'code' => $item->code,
+                'id' => $item['id'],
+                'name' => $item['name'],
+                'code' => $item['code'],
                 'quantity' => 1,  // Default quantity
-                'possible_amount' => $this->calculatePossibleAmount($item->id),  // Calculate possible amount
+                'possible_amount' => $item['available_quantity'],
             ];
             $this->itemSearch = '';  // Clear the search input
-            $this->items = [];  // Clear the search results
+            $this->searchAllItems();  // Reset the items list
         }
     }
 
