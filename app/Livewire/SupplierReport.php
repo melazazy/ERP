@@ -83,18 +83,12 @@ class SupplierReport extends Component
         $supplier = Supplier::find($this->selectedSupplier);
         $this->supplierName = $supplier->name;
 
-        $query = Receiving::with([
-            'item' => function($query) {
-                $query->from('Items');
-            },
-            'unit',
-            'department'
-        ])
-        ->where('supplier_id', $this->selectedSupplier)
-        ->whereBetween('received_at', [
-            Carbon::parse($this->dateFrom)->startOfDay(),
-            Carbon::parse($this->dateTo)->endOfDay()
-        ]);
+        $query = Receiving::with(['item', 'unit', 'department'])
+            ->where('supplier_id', $this->selectedSupplier)
+            ->whereBetween('received_at', [
+                Carbon::parse($this->dateFrom)->startOfDay(),
+                Carbon::parse($this->dateTo)->endOfDay()
+            ]);
 
         if ($this->docNumber) {
             $query->where('receiving_number', 'like', '%' . $this->docNumber . '%');
