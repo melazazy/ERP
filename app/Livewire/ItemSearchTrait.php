@@ -75,7 +75,7 @@ trait ItemSearchTrait
 
 
         // Only include items with available quantity > 0
-        $query->havingRaw('(COALESCE(SUM(receivings.quantity), 0) - (COALESCE(SUM(requisitions.quantity), 0) + COALESCE(SUM(trusts.quantity), 0))) > 0');
+        $query->havingRaw('(COALESCE(SUM(receivings.quantity), 0) - (COALESCE(SUM(requisitions.quantity), 0) + COALESCE(SUM(trusts.quantity), 0))) >= 0');
 
         return $query
             ->limit($limit)

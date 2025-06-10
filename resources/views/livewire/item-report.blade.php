@@ -1,12 +1,20 @@
 <div class="py-12 {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 min-h-[80vh]">
             <!-- Title -->
             <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">{{ __('messages.item_report') }}</h1>
 
             <!-- Controls Section -->
             <div class="mb-6 flex flex-col {{ app()->getLocale() === 'ar' ? 'items-end' : 'items-start' }} space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0 md:space-x-4">
-                <div class="w-full md:flex-1" x-data="{ open: false, selected: '{{ $selectedDepartment }}' }" x-init="$watch('selected', value => $wire.set('selectedDepartment', value, true))">
+                <div class="w-full md:flex-1" 
+                     x-data="{ 
+                         open: false, 
+                         selected: @entangle('selectedDepartment').live,
+                         init() {
+                             console.log('Alpine initialized with selected:', this.selected);
+                         }
+                     }"
+                     @department-changed.window="console.log('Department changed event:', $event.detail)">
                     <label for="department" class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.select_department') }}</label>
                     <div class="relative">
                         <button @click="open = !open" type="button" 
@@ -30,26 +38,52 @@
                              style="display: none;">
                             <div class="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white"
                                  :class="{ 'text-right': '{{ app()->getLocale() }}' === 'ar' }"
-                                 @click="selected = 'all'; open = false">
+                                 @click="
+                                     console.log('Selecting all departments');
+                                     selected = 'all';
+                                     open = false;
+                                     $wire.selectedDepartment = 'all';
+                                     $wire.$refresh();
+                                 ">
                                 <span class="block truncate">{{ __('messages.all_departments') }}</span>
                             </div>
                             @foreach($departments as $department)
-                                <div class="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white"
+                                <div wire:key="dept-{{ $department['id'] }}"
+                                     class="cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white"
                                      :class="{ 'text-right': '{{ app()->getLocale() }}' === 'ar' }"
-                                     @click="selected = '{{ $department['id'] }}'; open = false">
+                                     @click="
+                                         console.log('Selecting department:', '{{ $department['id'] }}');
+                                         selected = '{{ $department['id'] }}';
+                                         open = false;
+                                         $wire.selectedDepartment = '{{ $department['id'] }}';
+                                         $wire.$refresh();
+                                     ">
                                     <span class="block truncate">{{ $department['name'] }}</span>
                                 </div>
                             @endforeach
                         </div>
-                        <input type="hidden" name="department" x-model="selected">
                     </div>
                 </div>
                 
+                <!-- Month Selection Dropdown -->
+                <div class="w-full md:w-48">
+                    <label for="month" class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.select_month') }}</label>
+                    <select id="month" 
+                            wire:model.live="selectedMonth"
+                            class="w-full bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        @foreach(range(1, 12) as $month)
+                            <option value="{{ $month }}">
+                                {{ __('messages.months.' . strtolower(date('F', mktime(0, 0, 0, $month, 1)))) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 @if($selectedDepartment)
                 <div class="w-full md:flex-1">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.search_items') }}</label>
                     <div class="relative">
-                        <input wire:model.live="search" type="text" id="search" 
+                        <input wire:model.live.debounce.300ms="search" type="text" id="search" 
                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 {{ app()->getLocale() === 'ar' ? 'pr-10 text-right' : 'pl-10 text-left' }}" 
                                placeholder="{{ __('messages.search_item_placeholder') }}...">
                         <div class="absolute inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0 pr-3' : 'left-0 pl-3' }} flex items-center pointer-events-none">
@@ -62,10 +96,14 @@
 
                 <div class="w-full md:w-auto">
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.export') }}</label>
-                    <button wire:click="exportToExcel" 
-                            class="w-full md:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        <svg class="h-5 w-5 {{ app()->getLocale() === 'ar' ? 'ml-2' : 'mr-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button wire:click="exportToExcel" wire:loading.attr="disabled"
+                            class="w-full md:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg wire:loading.remove class="h-5 w-5 {{ app()->getLocale() === 'ar' ? 'ml-2' : 'mr-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <svg wire:loading class="animate-spin h-5 w-5 {{ app()->getLocale() === 'ar' ? 'ml-2' : 'mr-2' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         {{ __('messages.export_excel') }}
                     </button>
@@ -73,7 +111,17 @@
                 @endif
             </div>
 
-            @if($selectedDepartment && $items)
+            <!-- Loading Indicator -->
+            <div wire:loading.delay class="w-full flex justify-center items-center py-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+
+            <!-- Debug Loading State -->
+            <div wire:loading wire:target="loadItems" class="bg-blue-100 p-4 mb-4 rounded-lg">
+                {{ __('messages.loading') }}
+            </div>
+
+            @if($selectedDepartment && $this->items && $this->items->count() > 0)
             <!-- Report Table -->
             <div class="overflow-x-auto shadow-xl rounded-lg">
                 <table class="min-w-full bg-white">
@@ -193,8 +241,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        @foreach($items as $item)
-                            <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                        @foreach($this->items as $item)
+                            <tr wire:key="item-{{ $item['id'] ?? $loop->index }}" class="hover:bg-gray-50 transition duration-150 ease-in-out">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">{{ $item['name'] }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">{{ $item['code'] }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">{{ $item['unit'] }}</td>
@@ -221,36 +269,72 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-yellow-50">{{ number_format($item['balance_amount'], 2) }}</td>
                                 
                                 <!-- Additional -->
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-purple-50">{{ $item['act'] }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-purple-50">{{ $item['diff'] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-purple-50">act</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-purple-50">diff</td>
                             </tr>
                         @endforeach
                         <tr class="bg-gray-50 font-bold">
                             <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ __('messages.totals') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-blue-50">{{ number_format($totalOpeningQuantity, 2) }}</td>
+                            
+                            <!-- Opening Balance Totals -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-blue-50">
+                                {{ number_format(collect($this->items)->sum('opening_quantity'), 2) }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-blue-50">-</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-blue-50">{{ number_format($totalOpeningAmount, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-green-50">{{ number_format($totalInQuantity, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-green-50">{{ number_format($totalInAmount, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-indigo-50">{{ number_format($totalAvailableQuantity, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-indigo-50">{{ number_format($totalAvailableAmount, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-red-50">{{ number_format($totalOutQuantity, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-red-50">{{ number_format($totalOutAmount, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-yellow-50">{{ number_format($totalBalanceQuantity, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-yellow-50">{{ number_format($totalBalanceAmount, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-blue-50">
+                                {{ number_format(collect($this->items)->sum('opening_amount'), 2) }}
+                            </td>
+                            
+                            <!-- IN Totals -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-green-50">
+                                {{ number_format(collect($this->items)->sum('in_quantity'), 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-green-50">
+                                {{ number_format(collect($this->items)->sum('in_amount'), 2) }}
+                            </td>
+                            
+                            <!-- Total Available Totals -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-indigo-50">
+                                {{ number_format(collect($this->items)->sum('total_available_quantity'), 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-indigo-50">
+                                {{ number_format(collect($this->items)->sum('total_available_amount'), 2) }}
+                            </td>
+                            
+                            <!-- OUT Totals -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-red-50">
+                                {{ number_format(collect($this->items)->sum('out_quantity'), 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-red-50">
+                                {{ number_format(collect($this->items)->sum('out_amount'), 2) }}
+                            </td>
+                            
+                            <!-- Balance Totals -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-yellow-50">
+                                {{ number_format(collect($this->items)->sum('balance_quantity'), 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} bg-yellow-50">
+                                {{ number_format(collect($this->items)->sum('balance_amount'), 2) }}
+                            </td>
+                            
+                            <!-- Additional (empty cells) -->
                             <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-purple-50"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination -->
+            <div class="mt-4">
+                {{ $this->items->links() }}
+            </div>
+            @elseif($selectedDepartment)
+            <div class="text-center py-4">
+                {{ __('messages.no_items_found') }}
+            </div>
             @else
-            <!-- No Selection Message -->
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('messages.no_department_selected') }}</h3>
-                <p class="mt-1 text-sm text-gray-500">{{ __('messages.select_department_to_view_items') }}</p>
+            <div class="text-center py-4">
+                {{ __('messages.select_department_first') }}
             </div>
             @endif
         </div>

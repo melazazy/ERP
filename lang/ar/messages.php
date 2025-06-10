@@ -15,7 +15,7 @@ return [
     'pending_approvals' => 'الموافقات المعلقة',
     'available_items' => 'العناصر المتاحة',
     'active_requisitions' => 'الطلبات النشطة',
-    'create_receiving_voucher' => 'إنشاء سند استلام',
+    'create_receiving_voucher' => 'سند استلام',
     'receiving_number' => 'رقم الاستلام',
     'receiving_number_placeholder' => 'أدخل رقم الاستلام',
     'company_name' => 'اسم الشركة',
@@ -28,8 +28,8 @@ return [
     'add' => 'إضافة',
     'tax_rate' => 'نسبة الضريبة',
     'discount_rate' => 'نسبة الخصم',
-    'auto_create_requisition' => 'إنشاء طلب تلقائي',
-    'create_dir_requisition' => 'إنشاء طلب DIR',
+    'auto_create_requisition' => 'اذن صرف تلقائي',
+    'create_dir_requisition' => 'اذن صرف DIR',
     'id' => 'م',
     'item_code' => 'كود الصنف',
     'quantity' => 'الكمية',
@@ -170,7 +170,7 @@ return [
     'no_results_found' => 'لم يتم العثور على نتائج',
     'please_select' => 'الرجاء الاختيار',
     // Requisition Form Translations
-    'add_requisitions' => 'إضافة طلبات صرف',
+    'add_requisitions' => 'اذن صرف',
     'requisition_number' => 'رقم اذن الصرف',
     'requisition_number_placeholder' => 'أدخل رقم اذن الصرف',
     'search_department' => 'بحث عن قسم',
@@ -238,6 +238,7 @@ return [
     'description' => 'الوصف',
     'price' => 'السعر',
     // Export Reports
+    'allow_month_change' => 'اختيار الشهر يدويًا',
     'receivings' => 'استلامات',
     'requisitions' => 'اذون صرف',
     'export_reports' => 'تصدير التقارير',
@@ -291,4 +292,71 @@ return [
     'export_to_excel' => 'تصدير لإكسل',
     'export_success' => 'تم التصدير بنجاح!',
     'export_error' => 'حدث خطأ أثناء تصدير التقرير.',
+
+     // General
+    'erp_store' => 'نظام ERP المتكامل', // "Integrated ERP System" sounds more robust
+    'modern_inventory_management_system' => 'نظام حديث لإدارة المخزون', // Slightly more natural flow
+    'erp_store_description' => 'نظام ERP المتكامل - نظام شامل لإدارة المخزون مصمم لتبسيط عملياتك، وزيادة كفاءتك، وخفض تكاليفك.', // Using "تبسيط" (streamline/simplify) and "خفض" (reduce)
+    'erp_store_keywords' => 'ERP, إدارة المخزون, التحكم بالمخزون, إدارة المستودعات, سلاسل الإمداد', // "التحكم بالمخزون", "إدارة المستودعات", "سلاسل الإمداد" are common
+    'erp_store_author' => 'فريق نظام ERP', // "ERP System Team" or just the company name if it's different. "نظام ERP" as author is a bit impersonal.
+    'warehouse_inventory' => 'مخزون المستودعات', // Plural "المستودعات" (warehouses) if it can manage multiple
+
+    // Authentication
+    'login' => 'تسجيل الدخول',
+    'register' => 'إنشاء حساب', // More common for user registration
+    'logout' => 'تسجيل الخروج',
+    'already_have_an_account' => 'لديك حساب بالفعل؟', // More natural
+    'login_here' => 'سجّل الدخول من هنا', // More direct imperative
+
+    // Hero Section
+    'streamline_inventory_management' => 'تبسيط إدارة المخزون بفعالية', // Added "بفعالية" (effectively)
+    'comprehensive_erp_system_description' => 'نظام ERP متكامل مصمم لتحسين عملياتك، وزيادة الكفاءة، وتقليل التكاليف بذكاء.', // Added "بذكاء" (intelligently/smartly)
+
+    // Features Section
+    'powerful_features' => 'ميزات قوية لإدارة شاملة للمخزون',
+    'comprehensive_erp_system_features' => 'نظام ERP متكامل يوفر كل ما تحتاجه لإدارة مخزونك بكفاءة وذكاء.', // Added "لك" (to you) and "مخزونك" (your inventory) and "بذكاء"
+
+    // Feature Cards
+    'inventory_tracking' => 'تتبع دقيق للمخزون', // "Accurate inventory tracking"
+    'inventory_tracking_description' => 'تتبع آني لمستويات المخزون وحركته وقيمه، مع تنبيهات ذكية وقابلة للتخصيص.', // "آني" (real-time), "ذكية" (smart)
+    'receiving_management' => 'إدارة عمليات الاستلام', // "Managing receiving operations"
+    'receiving_management_description' => 'تحسين عملية الاستلام لديك عبر مسح الباركود، وضمان الجودة، والتوثيق الآلي.', // "لديك" (your), "الباركود" (common), "الآلي" (automated)
+    'requisition_processing' => 'معالجة طلبات الاحتياج', // More specific for inventory requisitions
+    'requisition_processing_description' => 'إدارة فعالة لطلبات الاحتياج مع دورات عمل للموافقات وتخصيص آلي للمخزون.', // "دورات عمل للموافقات" (approval workflows), "آلي" (automated)
+    'department_management' => 'إدارة الأقسام والمراكز', // Added "المراكز" (centers) if applicable (e.g., cost centers)
+    'department_management_description' => 'تنظيم المخزون حسب الأقسام مع صلاحيات وصول مخصصة وتتبع دقيق للميزانية.', // "صلاحيات وصول مخصصة" (custom access permissions), "دقيق" (accurate)
+    'supplier_management' => 'إدارة علاقات الموردين', // "Managing supplier relationships"
+    'supplier_management_description' => 'تعزيز علاقات الموردين بتتبع مؤشرات الأداء، بيانات الاتصال، وسجل الطلبات.', // "تعزيز" (strengthen/enhance), "سجل الطلبات" (order history)
+    'document_management' => 'إدارة الوثائق والمستندات', // "Managing documents and records"
+    'document_management_description' => 'أرشفة مركزية لجميع وثائق المخزون مع التحكم في الإصدارات وسهولة الاسترجاع.', // "أرشفة" (archiving), "وثائق" (documents), "سهولة الاسترجاع" (ease of retrieval)
+
+    // Navigation
+    'about' => 'من نحن', // "About Us" is more common for company info
+    'features' => 'الميزات', // Definite article is common in navigation
+    'pricing' => 'الأسعار', // "Prices" or "Pricing Plans" ("خطط الأسعار")
+    'contact' => 'تواصل معنا', // More common and friendly
+
+    // Footer
+    'all_rights_reserved' => 'جميع الحقوق محفوظة.',
+    'terms_of_service' => 'شروط الاستخدام', // "Terms of Use" is also very common
+    'privacy_policy' => 'سياسة الخصوصية',
+     'contact_us' => 'اتصل بنا',
+
+     'months'=>[
+        'january' => 'يناير',
+        'february' => 'فبراير',
+        'march' => 'مارس',
+        'april' => 'أبريل',
+        'may' => 'مايو',
+        'june' => 'يونيو',
+        'july' => 'يوليو',
+        'august' => 'أغسطس',
+        'september' => 'سبتمبر',
+        'october' => 'أكتوبر',
+        'november' => 'نوفمبر',
+        'december' => 'ديسمبر',
+    ],
+    'selected_month' => 'الشهر المحدد',
+    'select_month' => 'اختر الشهر',
+    'select_department_first' => 'الرجاء اختيار القسم أولاً',
 ];

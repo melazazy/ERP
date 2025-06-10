@@ -14,7 +14,7 @@ return [
     'my_requisitions' => 'My Requisitions',
     'available_items' => 'Available Items',
     'active_requisitions' => 'Active Requisitions',
-    'create_receiving_voucher' => 'Create Receiving Voucher',
+    'create_receiving_voucher' => 'Receiving Voucher',
     'receiving_number' => 'Receiving Number',
     'receiving_number_placeholder' => 'Receiving number',
     'company_name' => 'Company Name',
@@ -27,8 +27,8 @@ return [
     'add' => 'Add',
     'tax_rate' => 'Tax Rate',
     'discount_rate' => 'Discount Rate',
-    'auto_create_requisition' => 'Auto Create Requisition',
-    'create_dir_requisition' => 'Create DIR Requisition',
+    'auto_create_requisition' => 'Auto Requisition',
+    'create_dir_requisition' => 'DIR Requisition',
     'id' => 'ID',
     'item_code' => 'Item Code',
     'quantity' => 'Quantity',
@@ -70,7 +70,7 @@ return [
     'trusts' => 'Trusts',
     
     // Requisition Form Translations
-    'add_requisitions' => 'Add Requisitions',
+    'add_requisitions' => 'Requisitions',
     'requisition_number' => 'Requisition Number',
     'requisition_number_placeholder' => 'Requisition Number',
     'search_department' => 'Search Department',
@@ -96,6 +96,7 @@ return [
     'save_trust' => 'Save Trust',
     
     // Transfer Form Translations
+    'allow_month_change' => 'Allow Month Change',
     'transfer_items' => 'Transfer Items',
     'from_department' => 'From Department',
     'to_department' => 'To Department',
@@ -362,4 +363,69 @@ return [
     'export_to_excel' => 'Export to Excel',
     'export_success' => 'Export completed successfully!',
     'export_error' => 'An error occurred while exporting the report.',
+     // General
+     'erp_store' => 'ERP Store',
+     'modern_inventory_management_system' => 'Modern Inventory Management System',
+     'erp_store_description' => 'ERP Store - A comprehensive inventory management system designed to optimize your operations, increase efficiency, and reduce costs.',
+     'erp_store_keywords' => 'ERP, inventory management, stock control, warehouse management, supply chain',
+     'erp_store_author' => 'ERP Store',
+     'warehouse_inventory' => 'Warehouse inventory',
+ 
+     // Authentication
+     'login' => 'Login',
+     'register' => 'Register',
+     'logout' => 'Logout',
+     'already_have_an_account' => 'Already have an account?',
+     'login_here' => 'Login here',
+ 
+     // Hero Section
+     'streamline_inventory_management' => 'Streamline Your Inventory Management',
+     'comprehensive_erp_system_description' => 'A comprehensive ERP system designed to optimize your inventory operations, increase efficiency, and reduce costs.',
+ 
+     // Features Section
+     'powerful_features' => 'Powerful Features for Complete Inventory Control',
+     'comprehensive_erp_system_features' => 'Our comprehensive ERP system provides everything you need to manage your inventory efficiently.',
+ 
+     // Feature Cards
+     'inventory_tracking' => 'Inventory Tracking',
+     'inventory_tracking_description' => 'Real-time tracking of inventory levels, movements, and valuations with customizable alerts.',
+     'receiving_management' => 'Receiving Management',
+     'receiving_management_description' => 'Streamline your receiving process with barcode scanning, quality control, and automated documentation.',
+     'requisition_processing' => 'Requisition Processing',
+     'requisition_processing_description' => 'Efficient request management with approval workflows and automatic stock allocations.',
+     'department_management' => 'Department Management',
+     'department_management_description' => 'Organize inventory by departments with customizable access controls and budget tracking.',
+     'supplier_management' => 'Supplier Management',
+     'supplier_management_description' => 'Maintain supplier relationships with performance metrics, contact information, and order history.',
+     'document_management' => 'Document Management',
+     'document_management_description' => 'Centralized storage for all inventory-related documents with version control and quick retrieval.',
+ 
+     // Navigation
+     'about' => 'About',
+     'features' => 'Features',
+     'pricing' => 'Pricing',
+     'contact' => 'Contact',
+ 
+     // Footer
+     'all_rights_reserved' => 'All rights reserved.',
+     'terms_of_service' => 'Terms of Service',
+     'privacy_policy' => 'Privacy Policy',
+     'contact_us' => 'Contact Us',
+     'months' => [
+         'january' => 'January',
+         'february' => 'February',
+         'march' => 'March',
+         'april' => 'April',
+         'may' => 'May',
+         'june' => 'June',
+         'july' => 'July',
+         'august' => 'August',
+         'september' => 'September',
+         'october' => 'October',
+         'november' => 'November',
+         'december' => 'December',
+     ],
+     'selected_month' => 'Selected Month',
+    'select_month' => 'Select Month',
+    'select_department_first' => 'Please select a department first',
 ];

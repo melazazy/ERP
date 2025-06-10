@@ -290,14 +290,25 @@ class RequisitionSearch extends Component
 
     public function removeItem($itemId)
     {
-        $requisitionItem = Requisition::find($itemId);
-        if ($requisitionItem) {
+        try {
+            DB::beginTransaction();
+            
+            $requisitionItem = Requisition::find($itemId);
+            if (!$requisitionItem) {
+                session()->flash('error', 'Item not found.');
+                return;
+            }
+
             $requisitionItem->delete();
+            DB::commit();
+            
             $this->searchRequisition();
             $this->showDeleteItemConfirmation = null;
             session()->flash('message', 'Item removed successfully.');
-        } else {
-            session()->flash('error', 'Item not found.');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Error removing item: ' . $e->getMessage());
         }
     }
 
@@ -308,14 +319,29 @@ class RequisitionSearch extends Component
             return;
         }
 
-        Requisition::where('requisition_number', $this->currentRequisitionNumber)->delete();
-        $this->requisitionItems = [];
-        $this->currentRequisitionNumber = null;
-        $this->searchRequisitionNumber = '';
-        $this->date = now()->toDateString();
-        $this->selectedDepartmentId = null;
-        
-        session()->flash('message', 'All items have been removed from the requisition.');
+        try {
+            DB::beginTransaction();
+            
+            $deleted = Requisition::where('requisition_number', $this->currentRequisitionNumber)->delete();
+            
+            if ($deleted === 0) {
+                session()->flash('error', 'No items found to delete.');
+                return;
+            }
+            
+            DB::commit();
+            
+            $this->requisitionItems = [];
+            $this->currentRequisitionNumber = null;
+            $this->searchRequisitionNumber = '';
+            $this->date = now()->toDateString();
+            $this->selectedDepartmentId = null;
+            
+            session()->flash('message', 'All items have been removed from the requisition.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Error removing items: ' . $e->getMessage());
+        }
     }
 
     private function calculateTotals()

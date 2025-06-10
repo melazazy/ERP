@@ -27,14 +27,10 @@ class TransferForm extends Component
         $this->units = Unit::all()->toArray();
     }
     
-    public function updatedItemSearch()
-    {
-        if (strlen($this->itemSearch) >= 2) {
-            $this->items = $this->searchItems($this->itemSearch, 10);
-        } else {
-            $this->items = [];
-        }
-    }
+public function updatedItemSearch()
+{
+    $this->items = $this->searchItems($this->itemSearch, $this->getItemPerPage());
+}
 
     public function loadItems()
     {
@@ -57,6 +53,8 @@ class TransferForm extends Component
                 'quantity' => null,
                 'unit_id' => null
             ];
+            $this->items = [];
+            $this->itemSearch = '';
         }
     }
 

@@ -1,382 +1,384 @@
 <?php
 
+
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\Item;
 use App\Models\Department;
+use App\Models\Item;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ItemReportExport;
+use Illuminate\Support\Facades\Cache;
 
+
+// Solution 1: Don't store large datasets in component properties
 class ItemReport extends Component
 {
     use WithPagination;
-
+    // Remove $items from component properties to prevent serialization
+    // public $items = []; // REMOVE THIS LINE
+    
+    public $departments;
+    public $selectedDepartment;
+    public $selectedMonth;
     public $search = '';
-    public $selectedDepartment = '';
-    public $departments = [];
-    public $items = [];
-    public $totalOpeningQuantity = 0;
-    public $totalOpeningAmount = 0;
-    public $totalInQuantity = 0;
-    public $totalInAmount = 0;
-    public $totalAvailableQuantity = 0;
-    public $totalAvailableAmount = 0;
-    public $totalOutQuantity = 0;
-    public $totalOutAmount = 0;
-    public $totalBalanceQuantity = 0;
-    public $totalBalanceAmount = 0;
+    
+    // Add property type casting
+    protected $casts = [
+        'selectedMonth' => 'integer'
+    ];
 
     public function mount()
     {
         $this->departments = Department::orderBy('name')->get();
+        $this->selectedMonth = (int)now()->month;
     }
 
-    public function loadItems()
+    public function updatedSelectedMonth($value)
     {
-        if (!$this->selectedDepartment) {
-            $this->items = [];
-            $this->resetTotals();
-            return;
+        try {
+            $this->selectedMonth = (int)$value;
+            $this->resetPage();
+            $this->clearCache();
+            // Don't call loadItems() here - let the view handle it
+        } catch (\Exception $e) {
+            $this->selectedMonth = (int)now()->month;
         }
-
-        $query = Item::query()
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('code', 'like', '%' . $this->search . '%');
-                });
-            })
-            ->when($this->selectedDepartment !== 'all', function ($query) {
-                $query->whereHas('requisitions', function ($req) {
-                    $req->where('department_id', $this->selectedDepartment);
-                });
-            });
-
-        $items = $query->get();
-
-        $this->items = $items->map(function ($item) {
-            $balances = $this->calculateItemBalances($item);
-            
-            return [
-                'name' => $item->name,
-                'code' => $item->code,
-                'unit' => $item->unit,
-                'opening_quantity' => $balances['opening_quantity'],
-                'opening_unit_cost' => $balances['opening_unit_cost'],
-                'opening_amount' => $balances['opening_amount'],
-                'in_quantity' => $balances['in_quantity'],
-                'in_amount' => $balances['in_amount'],
-                'total_available_quantity' => $balances['total_available_quantity'],
-                'total_available_amount' => $balances['total_available_amount'],
-                'out_quantity' => $balances['out_quantity'],
-                'out_amount' => $balances['out_amount'],
-                'balance_quantity' => $balances['balance_quantity'],
-                'balance_amount' => $balances['balance_amount'],
-                'unit_cost' => $balances['unit_cost'],
-                'act' => 0,
-                'diff' => 0
-            ];
-        })->toArray();
-
-        $this->calculateTotals();
     }
 
-    private function resetTotals()
+    public function updatedSelectedDepartment($value = null)
     {
-        $this->totalOpeningQuantity = 0;
-        $this->totalOpeningAmount = 0;
-        $this->totalInQuantity = 0;
-        $this->totalInAmount = 0;
-        $this->totalAvailableQuantity = 0;
-        $this->totalAvailableAmount = 0;
-        $this->totalOutQuantity = 0;
-        $this->totalOutAmount = 0;
-        $this->totalBalanceQuantity = 0;
-        $this->totalBalanceAmount = 0;
-    }
-
-    public function updatedSelectedDepartment()
-    {
-        $this->loadItems();
+        $this->resetPage();
+        $this->clearCache();
+        // Don't call loadItems() here - let the view handle it
     }
 
     public function updatedSearch()
     {
-        $this->loadItems();
+        $this->resetPage();
+        $this->clearCache();
+        // Don't call loadItems() here - let the view handle it
+    }
+
+    // Make this method return data instead of storing it
+    public function getItemsProperty()
+    {
+        if (!$this->selectedDepartment) {
+            return collect([]);
+        }
+
+        try {
+            // Build query
+            $query = Item::query();
+
+            if ($this->search) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('code', 'like', '%' . $this->search . '%');
+                });
+            }
+
+            if ($this->selectedDepartment !== 'all') {
+                $query->whereHas('requisitions', function ($q) {
+                    $q->where('department_id', $this->selectedDepartment);
+                });
+            }
+
+            // Always use pagination for display
+            $items = $query->paginate(50);
+
+            // Map items to array with balances
+            $mappedItems = $items->getCollection()->map(function ($item) {
+                try {
+                    $balances = $this->calculateItemBalances($item);
+                    return array_merge(
+                        [
+                            'id' => $item->id,
+                            'name' => $item->name,
+                            'code' => $item->code,
+                            'unit' => $item->unit,
+                        ],
+                        $balances
+                    );
+                } catch (\Exception $e) {
+                    return null;
+                }
+            })->filter()->values();
+
+            // Replace the collection in the paginator
+            $items->setCollection($mappedItems);
+            
+            return $items;
+
+        } catch (\Exception $e) {
+            return collect([]);
+        }
+    }
+
+    // Computed properties for totals - now work with paginated data
+    public function getTotalOpeningQuantityProperty()
+    {
+        return $this->items->sum('opening_quantity');
+    }
+
+    public function getTotalOpeningAmountProperty()
+    {
+        return $this->items->sum('opening_amount');
+    }
+
+    public function getTotalInQuantityProperty()
+    {
+        return $this->items->sum('in_quantity');
+    }
+
+    public function getTotalInAmountProperty()
+    {
+        return $this->items->sum('in_amount');
+    }
+
+    public function getTotalAvailableQuantityProperty()
+    {
+        return $this->items->sum('total_available_quantity');
+    }
+
+    public function getTotalAvailableAmountProperty()
+    {
+        return $this->items->sum('total_available_amount');
+    }
+
+    public function getTotalOutQuantityProperty()
+    {
+        return $this->items->sum('out_quantity');
+    }
+
+    public function getTotalOutAmountProperty()
+    {
+        return $this->items->sum('out_amount');
+    }
+
+    public function getTotalBalanceQuantityProperty()
+    {
+        return $this->items->sum('balance_quantity');
+    }
+
+    public function getTotalBalanceAmountProperty()
+    {
+        return $this->items->sum('balance_amount');
     }
 
     private function calculateItemBalances($item)
     {
-        $startOfMonth = now()->startOfMonth();
-        
-        // Calculate opening balance (all transactions before current month)
-        $openingReceivings = $item->receivings()
-            ->where('received_at', '<', $startOfMonth)
-            ->get();
+        try {
+            // Calculate dates for the selected month
+            $selectedMonth = (int)$this->selectedMonth;
+            $startOfMonth = now()->startOfYear()->month($selectedMonth)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+            $endOfPreviousMonth = $startOfMonth->copy()->subDay();
+
+            // Calculate opening balance (all transactions up to end of previous month)
+            $openingReceivings = $item
+                ->receivings()
+                ->where('received_at', '<=', $endOfPreviousMonth)
+                ->orderBy('received_at')
+                ->get();
+
+            $openingRequisitions = $item
+                ->requisitions()
+                ->where('requested_date', '<=', $endOfPreviousMonth)
+                ->when($this->selectedDepartment && $this->selectedDepartment !== 'all', function ($query) {
+                    $query->where('department_id', $this->selectedDepartment);
+                })
+                ->orderBy('requested_date')
+                ->get();
+
+            $openingTrusts = $item
+                ->trusts()
+                ->where('requested_date', '<=', $endOfPreviousMonth)
+                ->orderBy('requested_date')
+                ->get();
+
+            // Calculate totals for this item
+            $totalInQuantity = $openingReceivings->sum('quantity');
+            $totalInValue = $openingReceivings->sum(function ($receiving) {
+                return $receiving->quantity * ($receiving->unit_price ?? 0);
+            });
+
+            $totalOutQuantity = $openingRequisitions->sum('quantity') + $openingTrusts->sum('quantity');
+            $openingQuantity = $totalInQuantity - $totalOutQuantity;
+
+            // Reset values if opening quantity is zero or negative
+            if ($openingQuantity <= 0) {
+                $openingQuantity = 0;
+                $openingUnitCost = 0;
+                $openingAmount = 0;
+            } else {
+                // Calculate weighted average unit cost only if there are incoming items
+                $openingUnitCost = $totalInQuantity > 0 ? $totalInValue / $totalInQuantity : 0;
+                $openingAmount = $openingQuantity * $openingUnitCost;
+            }
+
+            // Current month transactions (only for selected month)
+            $currentReceivings = $item
+                ->receivings()
+                ->whereBetween('received_at', [$startOfMonth, $endOfMonth])
+                ->orderBy('received_at')
+                ->get();
+
+            // Calculate in_quantity and in_amount for the selected month
+            $inQuantity = $currentReceivings->sum('quantity');
+            $inAmount = $currentReceivings->sum(function ($receiving) {
+                return $receiving->quantity * ($receiving->unit_price ?? 0);
+            });
+
+            // Calculate out_quantity and out_amount for the selected month
+            $currentRequisitions = $item
+                ->requisitions()
+                ->whereBetween('requested_date', [$startOfMonth, $endOfMonth])
+                ->when($this->selectedDepartment && $this->selectedDepartment !== 'all', function ($query) {
+                    $query->where('department_id', $this->selectedDepartment);
+                })
+                ->orderBy('requested_date')
+                ->get();
+
+            $currentTrusts = $item
+                ->trusts()
+                ->whereBetween('requested_date', [$startOfMonth, $endOfMonth])
+                ->orderBy('requested_date')
+                ->get();
+
+            $outQuantity = $currentRequisitions->sum('quantity') + $currentTrusts->sum('quantity');
+
+            // Calculate total available
+            $totalAvailableQuantity = $openingQuantity + $inQuantity;
             
-        $openingRequisitions = $item->requisitions()
-            ->where('requested_date', '<', $startOfMonth)
-            ->when($this->selectedDepartment, function ($query) {
-                $query->where('department_id', $this->selectedDepartment);
-            })
-            ->get();
+            // Calculate new weighted average cost if there are new receivings
+            if ($inQuantity > 0) {
+                $totalAvailableAmount = ($openingQuantity * $openingUnitCost) + $inAmount;
+                $weightedAverageCost = $totalAvailableQuantity > 0 ? $totalAvailableAmount / $totalAvailableQuantity : 0;
+            } else {
+                $totalAvailableAmount = $totalAvailableQuantity * $openingUnitCost;
+                $weightedAverageCost = $openingUnitCost;
+            }
+
+            // Calculate out amount using weighted average cost
+            $outAmount = $outQuantity * $weightedAverageCost;
+
+            // Calculate final balance
+            $balanceQuantity = $totalAvailableQuantity - $outQuantity;
             
-        $openingTrusts = $item->trusts()
-            ->where('requested_date', '<', $startOfMonth)
-            ->get();
+            // Reset values if balance quantity is zero or negative
+            if ($balanceQuantity <= 0) {
+                $balanceQuantity = 0;
+                $balanceAmount = 0;
+                $unitCost = 0;
+            } else {
+                $balanceAmount = $balanceQuantity * $weightedAverageCost;
+                $unitCost = $weightedAverageCost;
+            }
 
-        // Calculate current month transactions
-        $currentReceivings = $item->receivings()
-            ->whereMonth('received_at', now()->month)
-            ->get();
-            
-        $currentRequisitions = $item->requisitions()
-            ->whereMonth('requested_date', now()->month)
-            ->when($this->selectedDepartment, function ($query) {
-                $query->where('department_id', $this->selectedDepartment);
-            })
-            ->get();
-            
-        $currentTrusts = $item->trusts()
-            ->whereMonth('requested_date', now()->month)
-            ->get();
-
-        // Opening Balance Calculations
-        $openingInQuantity = $openingReceivings->sum('quantity');
-        $openingOutQuantity = $openingRequisitions->sum('quantity') + $openingTrusts->sum('quantity');
-        $openingQuantity = $openingInQuantity - $openingOutQuantity;
-        
-        $openingInValue = $openingReceivings->sum(function ($receiving) {
-            return $receiving->quantity * $receiving->unit_price;
-        });
-        $openingUnitCost = $openingInQuantity > 0 ? $openingInValue / $openingInQuantity : 0;
-        $openingAmount = $openingQuantity * $openingUnitCost;
-
-        // Current Month Calculations
-        $inQuantity = $currentReceivings->sum('quantity');
-        $inAmount = $currentReceivings->sum(function ($receiving) {
-            return $receiving->quantity * $receiving->unit_price;
-        });
-
-        $outQuantity = $currentRequisitions->sum('quantity') + $currentTrusts->sum('quantity');
-        $outAmount = $outQuantity * $openingUnitCost;
-
-        // Total Available
-        $totalAvailableQuantity = $openingQuantity + $inQuantity;
-        $totalAvailableAmount = $openingAmount + $inAmount;
-
-        // Final Balance
-        $balanceQuantity = $totalAvailableQuantity - $outQuantity;
-        $balanceAmount = $totalAvailableAmount - $outAmount;
-        $unitCost = $balanceQuantity > 0 ? $balanceAmount / $balanceQuantity : $openingUnitCost;
-
-        return [
-            'opening_quantity' => $openingQuantity,
-            'opening_unit_cost' => $openingUnitCost,
-            'opening_amount' => $openingAmount,
-            'in_quantity' => $inQuantity,
-            'in_amount' => $inAmount,
-            'total_available_quantity' => $totalAvailableQuantity,
-            'total_available_amount' => $totalAvailableAmount,
-            'out_quantity' => $outQuantity,
-            'out_amount' => $outAmount,
-            'balance_quantity' => $balanceQuantity,
-            'balance_amount' => $balanceAmount,
-            'unit_cost' => $unitCost
-        ];
+            return [
+                'opening_quantity' => round($openingQuantity, 2),
+                'opening_unit_cost' => round($openingUnitCost, 2),
+                'opening_amount' => round($openingAmount, 2),
+                'in_quantity' => round($inQuantity, 2),
+                'in_amount' => round($inAmount, 2),
+                'total_available_quantity' => round($totalAvailableQuantity, 2),
+                'total_available_amount' => round($totalAvailableAmount, 2),
+                'out_quantity' => round($outQuantity, 2),
+                'out_amount' => round($outAmount, 2),
+                'balance_quantity' => round($balanceQuantity, 2),
+                'balance_amount' => round($balanceAmount, 2),
+                'unit_cost' => round($unitCost, 2)
+            ];
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
-    private function calculateTotals()
+    // Separate method to get all items for export (not stored in component)
+    private function getAllItemsForExport()
     {
-        $this->totalOpeningQuantity = collect($this->items)->sum('opening_quantity');
-        $this->totalOpeningAmount = collect($this->items)->sum('opening_amount');
-        $this->totalInQuantity = collect($this->items)->sum('in_quantity');
-        $this->totalInAmount = collect($this->items)->sum('in_amount');
-        $this->totalAvailableQuantity = collect($this->items)->sum('total_available_quantity');
-        $this->totalAvailableAmount = collect($this->items)->sum('total_available_amount');
-        $this->totalOutQuantity = collect($this->items)->sum('out_quantity');
-        $this->totalOutAmount = collect($this->items)->sum('out_amount');
-        $this->totalBalanceQuantity = collect($this->items)->sum('balance_quantity');
-        $this->totalBalanceAmount = collect($this->items)->sum('balance_amount');
+        if (!$this->selectedDepartment) {
+            return collect([]);
+        }
+
+        try {
+            // Build query
+            $query = Item::query();
+
+            if ($this->search) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('code', 'like', '%' . $this->search . '%');
+                });
+            }
+
+            if ($this->selectedDepartment !== 'all') {
+                $query->whereHas('requisitions', function ($q) {
+                    $q->where('department_id', $this->selectedDepartment);
+                });
+            }
+
+            // Get all items for export
+            $items = $query->get();
+
+            // Map items to array with balances
+            return $items->map(function ($item) {
+                try {
+                    $balances = $this->calculateItemBalances($item);
+                    return array_merge(
+                        [
+                            'id' => $item->id,
+                            'name' => $item->name,
+                            'code' => $item->code,
+                            'unit' => $item->unit,
+                        ],
+                        $balances
+                    );
+                } catch (\Exception $e) {
+                    return null;
+                }
+            })->filter()->values()->toArray();
+
+        } catch (\Exception $e) {
+            return collect([]);
+        }
     }
 
     public function exportToExcel()
     {
-        $fileName = 'item_report_' . date('Y-m-d') . '.xlsx';
+        try {
+            // Get all items for export without storing in component
+            $exportItems = $this->getAllItemsForExport();
 
-        return Excel::download(new class($this->items, $this->totalOpeningQuantity, $this->totalOpeningAmount,
-            $this->totalInQuantity, $this->totalInAmount, $this->totalAvailableQuantity, $this->totalAvailableAmount,
-            $this->totalOutQuantity, $this->totalOutAmount, $this->totalBalanceQuantity, $this->totalBalanceAmount) implements 
-            \Maatwebsite\Excel\Concerns\FromCollection,
-            \Maatwebsite\Excel\Concerns\WithHeadings,
-            \Maatwebsite\Excel\Concerns\WithStyles,
-            \Maatwebsite\Excel\Concerns\WithColumnWidths
-        {
-            private $items;
-            private $totals;
-
-            public function __construct($items, ...$totals)
-            {
-                $this->items = $items;
-                $this->totals = $totals;
+            if (empty($exportItems)) {
+                $this->dispatch('error', message: __('messages.no_data_to_export'));
+                return null;
             }
 
-            public function collection()
-            {
-                $data = collect($this->items)->map(function ($item) {
-                    return [
-                        $item['code'],
-                        $item['name'],
-                        $item['unit'],
-                        $item['opening_quantity'],
-                        $item['opening_unit_cost'],
-                        $item['opening_amount'],
-                        $item['in_quantity'],
-                        $item['in_amount'],
-                        $item['total_available_quantity'],
-                        $item['total_available_amount'],
-                        $item['out_quantity'],
-                        $item['out_amount'],
-                        $item['balance_quantity'],
-                        $item['balance_amount'],
-                        $item['act'],
-                        $item['diff']
-                    ];
-                });
+            // Get month name
+            $monthName = date('F', mktime(0, 0, 0, $this->selectedMonth, 1));
+            $fileName = "item-report-{$monthName}" . '.xlsx';
 
-                // Add totals row
-                $data->push([
-                    'Totals', '', '',
-                    $this->totals[0], // opening quantity
-                    '-',
-                    $this->totals[1], // opening amount
-                    $this->totals[2], // in quantity
-                    $this->totals[3], // in amount
-                    $this->totals[4], // available quantity
-                    $this->totals[5], // available amount
-                    $this->totals[6], // out quantity
-                    $this->totals[7], // out amount
-                    $this->totals[8], // balance quantity
-                    $this->totals[9], // balance amount
-                    '-',
-                    '-'
-                ]);
+            return Excel::download(
+                new ItemReportExport($exportItems, $this->selectedMonth, $this->selectedDepartment, $this->search),
+                $fileName
+            );
 
-                return $data;
-            }
-
-            public function headings(): array
-            {
-                return [
-                    [
-                        'Code',
-                        'Item',
-                        'Unit',
-                        'Opening Balance',
-                        '',
-                        '',
-                        'IN',
-                        '',
-                        'Total Available',
-                        '',
-                        'OUT',
-                        '',
-                        'Balance',
-                        '',
-                        'Additional',
-                        ''
-                    ],
-                    [
-                        '',
-                        '',
-                        '',
-                        'Quant',
-                        'Unit Cost',
-                        'Amount',
-                        'Quant',
-                        'Amount',
-                        'Quant',
-                        'Amount',
-                        'Quant',
-                        'Amount',
-                        'Quant',
-                        'Amount',
-                        'Act',
-                        'Diff'
-                    ],
-                ];
-            }
-
-            public function styles($sheet)
-            {
-                // Style for headers
-                $sheet->getStyle('A1:P2')->applyFromArray([
-                    'font' => ['bold' => true],
-                    'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
-                ]);
-
-                // Merge cells for first row headers
-                $sheet->mergeCells('A1:A2');
-                $sheet->mergeCells('B1:B2');
-                $sheet->mergeCells('C1:C2');
-                $sheet->mergeCells('D1:F1'); // Opening Balance
-                $sheet->mergeCells('G1:H1'); // IN
-                $sheet->mergeCells('I1:J1'); // Total Available
-                $sheet->mergeCells('K1:L1'); // OUT
-                $sheet->mergeCells('M1:N1'); // Balance
-                $sheet->mergeCells('O1:P1'); // Additional
-
-                // Color coding for sections
-                $sheet->getStyle('D1:F2')->getFill()->setFillType('solid')->getStartColor()->setRGB('87CEEB'); // Opening Balance
-                $sheet->getStyle('G1:H2')->getFill()->setFillType('solid')->getStartColor()->setRGB('98FB98'); // IN
-                $sheet->getStyle('I1:J2')->getFill()->setFillType('solid')->getStartColor()->setRGB('F0E68C'); // Total Available
-                $sheet->getStyle('K1:L2')->getFill()->setFillType('solid')->getStartColor()->setRGB('FFB6C1'); // OUT
-                $sheet->getStyle('M1:N2')->getFill()->setFillType('solid')->getStartColor()->setRGB('98FB98'); // Balance
-                $sheet->getStyle('O1:P2')->getFill()->setFillType('solid')->getStartColor()->setRGB('D3D3D3'); // Additional
-
-                // Style for data cells
-                $lastRow = count($this->items) + 3;
-                $sheet->getStyle('A3:P'.$lastRow)->applyFromArray([
-                    'alignment' => ['horizontal' => 'right'],
-                ]);
-                $sheet->getStyle('A3:C'.$lastRow)->applyFromArray([
-                    'alignment' => ['horizontal' => 'left'],
-                ]);
-
-                // Style for totals row
-                $sheet->getStyle('A'.$lastRow.':P'.$lastRow)->applyFromArray([
-                    'font' => ['bold' => true],
-                    'borders' => ['top' => ['borderStyle' => 'thin']],
-                ]);
-
-                return $sheet;
-            }
-
-            public function columnWidths(): array
-            {
-                return [
-                    'A' => 12, // Code
-                    'B' => 30, // Item
-                    'C' => 10, // Unit
-                    'D' => 12, // Opening Quant
-                    'E' => 12, // Opening Unit Cost
-                    'F' => 15, // Opening Amount
-                    'G' => 12, // IN Quant
-                    'H' => 15, // IN Amount
-                    'I' => 12, // Available Quant
-                    'J' => 15, // Available Amount
-                    'K' => 12, // OUT Quant
-                    'L' => 15, // OUT Amount
-                    'M' => 12, // Balance Quant
-                    'N' => 15, // Balance Amount
-                    'O' => 10, // Act
-                    'P' => 10, // Diff
-                ];
-            }
-        }, $fileName);
+        } catch (\Exception $e) {
+            $this->dispatch('error', message: __('messages.export_error'));
+            return null;
+        }
     }
-    
+
+    // Method to clear cache when needed
+    public function clearCache()
+    {
+        $cacheKey = "item_report_{$this->selectedDepartment}_{$this->selectedMonth}_{$this->search}";
+        Cache::forget($cacheKey);
+    }
+
     public function render()
     {
         return view('livewire.item-report')->layout('layouts.app');
