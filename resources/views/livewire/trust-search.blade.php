@@ -1,7 +1,7 @@
 <!-- resources/views/livewire/trust-search.blade.php -->
 <div class="py-12 {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+        <div class="bg-white shadow-xl sm:rounded-lg p-6">
             <!-- Title -->
             <h2 class="text-2xl font-semibold mb-6">{{ __('messages.trusts') }}</h2>
 
@@ -215,132 +215,151 @@
                             </div>
                         @endif
 
-                        <table class="min-w-full bg-white border">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="py-2 px-4 border">{{ __('messages.item') }}</th>
-                                    <th class="py-2 px-4 border">{{ __('messages.quantity') }}</th>
-                                    <th class="py-2 px-4 border">{{ __('messages.department') }}</th>
-                                    <th class="py-2 px-4 border">{{ __('messages.requested_by') }}</th>
-                                    <th class="py-2 px-4 border">{{ __('messages.status') }}</th>
-                                    <th class="py-2 px-4 border">{{ __('messages.actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($trustItems as $item)
+                        @if($searchTrustNumber)
+                            <!-- Single Trust View -->
+                            <table class="min-w-full bg-white border">
+                                <thead class="bg-gray-100">
                                     <tr>
-                                        <td class="py-2 px-4 border">
-                                            @if($editingItemId === $item['id'])
-                                                <div class="relative">
-                                                    <div class="flex items-center mb-2">
-                                                        <input type="text" 
-                                                               wire:model.live="itemSearch"
-                                                               class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                               placeholder="{{ __('messages.search_item_by_code_or_name') }}">
-                                                    </div>
-                                                    @if(!empty($searchedItems))
-                                                        <div class="absolute z-10 w-full bg-white border rounded shadow-lg max-h-60 overflow-auto mt-1">
-                                                            @foreach($searchedItems as $searchedItem)
-                                                                <div wire:click="selectEditingItem({{ $searchedItem['id'] }})"
-                                                                     class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-0">
-                                                                    <div class="font-medium">{{ $searchedItem['name'] }}</div>
-                                                                    <div class="text-sm text-gray-500">{{ $searchedItem['code'] }}</div>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
+                                        <th class="py-2 px-4 border">{{ __('messages.item_name') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.item_code') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.quantity') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.department') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.requested_by') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.status') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($trustItems as $item)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="py-2 px-4 border">{{ $item['item']['name'] }}</td>
+                                            <td class="py-2 px-4 border">{{ $item['item']['code'] }}</td>
+                                            <td class="py-2 px-4 border">
+                                                @if($editingItemId === $item['id'])
+                                                    <input type="number" 
+                                                           wire:model="editingItem.quantity" 
+                                                           class="w-20 border rounded px-2 py-1"
+                                                           min="1">
+                                                @else
+                                                    {{ $item['quantity'] }}
+                                                @endif
+                                            </td>
+                                            <td class="py-2 px-4 border">{{ $item['department']['name'] }}</td>
+                                            <td class="py-2 px-4 border">{{ $item['requested_by']['name'] }}</td>
+                                            <td class="py-2 px-4 border">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                    {{ $item['status'] === 'approved' ? 'bg-green-100 text-green-800' : 
+                                                       ($item['status'] === 'rejected' ? 'bg-red-100 text-red-800' : 
+                                                       'bg-yellow-100 text-yellow-800') }}">
+                                                    {{ $item['status'] }}
+                                                </span>
+                                            </td>
+                                            <td class="py-2 px-4 border">
+                                                <div class="flex space-x-2">
+                                                    @if($editingItemId === $item['id'])
+                                                        <button wire:click="saveItemChanges" 
+                                                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                                            {{ __('messages.save') }}
+                                                        </button>
+                                                        <button wire:click="cancelEdit" 
+                                                                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                                            {{ __('messages.cancel') }}
+                                                        </button>
+                                                    @else
+                                                        <button wire:click="editItem({{ $item['id'] }})" 
+                                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                                            {{ __('messages.edit') }}
+                                                        </button>
+                                                        <button wire:click="$set('showDeleteItemConfirmation', {{ $item['id'] }})" 
+                                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                                            {{ __('messages.delete') }}
+                                                        </button>
                                                     @endif
                                                 </div>
-                                            @else
-                                                {{ $item['item']['name'] }}
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border">
-                                            @if($editingItemId === $item['id'])
-                                                <input type="number" step="0.0001" wire:model="editingItem.quantity"
-                                                    class="w-20 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            @else
-                                                {{ $item['quantity'] }}
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border">
-                                            @if($editingItemId === $item['id'])
-                                                <select wire:model="editingItem.department_id"
-                                                    class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                    <option value="">{{ __('messages.select_department') }}</option>
-                                                    @foreach($departments as $department)
-                                                        <option value="{{ $department['id'] }}"
-                                                                @if($editingItem['department_id'] == $department['id']) selected @endif>
-                                                            {{ $department['name'] }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            @else
-                                                {{ $item['department']['name'] }}
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border">
-                                            @if($editingItemId === $item['id'])
-                                                <select wire:model="editingItem.requested_by_id"
-                                                    class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                    <option value="">{{ __('messages.select_user') }}</option>
-                                                    @foreach($users as $user)
-                                                        <option value="{{ $user['id'] }}"
-                                                                @if($editingItem['requested_by_id'] == $user['id']) selected @endif>
-                                                            {{ $user['name'] }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            @else
-                                                {{ $item['requested_by']['name'] }}
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border">
-                                            @if($editingItemId === $item['id'])
-                                                <select wire:model="editingItem.status"
-                                                    class="w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                    <option value="">{{ __('messages.select_status') }}</option>
-                                                    <option value="pending" @if($editingItem['status'] == 'pending') selected @endif>{{ __('messages.pending') }}</option>
-                                                    <option value="approved" @if($editingItem['status'] == 'approved') selected @endif>{{ __('messages.approved') }}</option>
-                                                    <option value="rejected" @if($editingItem['status'] == 'rejected') selected @endif>{{ __('messages.rejected') }}</option>
-                                                </select>
-                                            @else
-                                                {{ $item['status'] }}
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border">
-                                            @if($editingItemId === $item['id'])
-                                                <button wire:click="saveItemChanges" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">{{ __('messages.save') }}</button>
-                                                <button wire:click="cancelEdit" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">{{ __('messages.cancel') }}</button>
-                                            @else
-                                                <button wire:click="editItem({{ $item['id'] }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">{{ __('messages.edit') }}</button>
-                                                <button wire:click="$set('showDeleteItemConfirmation', {{ $item['id'] }})" 
-                                                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            @endif
-                                        </td>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <!-- Date Range Search View -->
+                            <table class="min-w-full bg-white border">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-2 px-4 border">{{ __('messages.requisition_number') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.requested_date') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.department') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.requested_by') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.total_items') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.status') }}</th>
+                                        <th class="py-2 px-4 border">{{ __('messages.actions') }}</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                        @if(isset($showDeleteItemConfirmation))
-                            <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-                                <div class="bg-white p-6 rounded-lg shadow-xl">
-                                    <h3 class="text-lg font-semibold mb-4">{{ __('messages.confirm_deletion') }}</h3>
-                                    <p class="mb-4">{{ __('messages.are_you_sure_you_want_to_remove_this_item_from_the_trust') }}</p>
-                                    <div class="flex justify-end gap-2">
-                                        <button wire:click="$set('showDeleteItemConfirmation', null)" 
-                                                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                            {{ __('messages.cancel') }}
-                                        </button>
-                                        <button wire:click="removeItem({{ $showDeleteItemConfirmation }}); $set('showDeleteItemConfirmation', null)" 
-                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                            {{ __('messages.remove') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                </thead>
+                                <tbody>
+                                    @foreach($trustItems as $trust)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="py-2 px-4 border">
+                                                <button wire:click="searchTrust('{{ $trust['requisition_number'] }}')"
+                                                        class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                    {{ $trust['requisition_number'] }}
+                                                </button>
+                                            </td>
+                                            <td class="py-2 px-4 border">{{ date('Y-m-d', strtotime($trust['requested_date'])) }}</td>
+                                            <td class="py-2 px-4 border">{{ $trust['department']['name'] }}</td>
+                                            <td class="py-2 px-4 border">{{ $trust['requested_by']['name'] }}</td>
+                                            <td class="py-2 px-4 border">
+                                                <span class="font-semibold">{{ $trust['total_items'] }}</span> items
+                                                <span class="text-gray-500">(Total: {{ $trust['total_quantity'] }})</span>
+                                            </td>
+                                            <td class="py-2 px-4 border">
+                                                @foreach($trust['statuses'] as $status)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                        {{ $status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                                           ($status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                                                           'bg-yellow-100 text-yellow-800') }}">
+                                                        {{ $status }}
+                                                    </span>
+                                                @endforeach
+                                            </td>
+                                            <td class="py-2 px-4 border">
+                                                <div x-data="{ open: false }" class="relative">
+                                                    <button @click="open = !open" 
+                                                            class="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 focus:outline-none">
+                                                        {{ __('messages.view_items') }}
+                                                    </button>
+                                                    
+                                                    <div x-show="open" 
+                                                         @click.away="open = false"
+                                                         class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl z-50">
+                                                        <div class="p-4">
+                                                            <h3 class="text-lg font-semibold mb-2">{{ __('messages.items_in_trust') }}</h3>
+                                                            <div class="space-y-2">
+                                                                @foreach($trust['items'] as $item)
+                                                                    <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                                                                        <div>
+                                                                            <div class="font-medium">{{ $item['item']['name'] }}</div>
+                                                                            <div class="text-sm text-gray-500">{{ $item['item']['code'] }}</div>
+                                                                        </div>
+                                                                        <div class="text-right">
+                                                                            <div class="font-medium">Qty: {{ $item['quantity'] }}</div>
+                                                                            <div class="text-sm {{ 
+                                                                                $item['status'] === 'approved' ? 'text-green-600' : 
+                                                                                ($item['status'] === 'rejected' ? 'text-red-600' : 'text-yellow-600') 
+                                                                            }}">
+                                                                                {{ $item['status'] }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         @endif
                     </div>
                 @endif
