@@ -271,7 +271,9 @@ class ReceivingForm extends Component
 
         // Calculate subtotal
         $this->subtotal = collect($items)->sum(function ($item) {
-            return $item['quantity'] * $item['unit_price'];
+            return (is_numeric($item['quantity']) && is_numeric($item['unit_price'])) 
+                ? ($item['quantity'] * $item['unit_price']) 
+                : 0;
         });
 
         // Calculate tax and discount
@@ -284,11 +286,15 @@ class ReceivingForm extends Component
         // Update individual item totals
         if ($this->editMode) {
             foreach ($this->receivingItems as $index => $item) {
-                $this->receivingItems[$index]['total'] = $item['quantity'] * $item['unit_price'];
+                $this->receivingItems[$index]['total'] = (is_numeric($item['quantity']) && is_numeric($item['unit_price'])) 
+                    ? ($item['quantity'] * $item['unit_price']) 
+                    : 0;
             }
         } else {
             foreach ($this->selectedItems as $index => $item) {
-                $this->selectedItems[$index]['total'] = $item['quantity'] * $item['unit_price'];
+                $this->selectedItems[$index]['total'] = (is_numeric($item['quantity']) && is_numeric($item['unit_price'])) 
+                    ? ($item['quantity'] * $item['unit_price']) 
+                    : 0;
             }
         }
     }

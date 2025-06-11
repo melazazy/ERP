@@ -145,7 +145,7 @@ new class extends Component {
                                 {{ __('messages.inventory_reports') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('department-reports')" wire:navigate>
-                                {{ __('messages.department_report') }}
+                                {{ __('messages.department_report.title') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('supplier-reports')" wire:navigate>
                                 {{ __('messages.supplier_report') }}
@@ -270,7 +270,7 @@ new class extends Component {
                 {{ __('messages.inventory_reports') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('department-reports')" :active="request()->routeIs('department-reports')" wire:navigate>
-                {{ __('messages.department_report') }}
+                {{ __('messages.department_report.title') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('document-search')" :active="request()->routeIs('document-search')" wire:navigate>
                 {{ __('messages.document_search') }}

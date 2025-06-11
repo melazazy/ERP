@@ -2,22 +2,22 @@
 <div>
     <div class="p-6">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold">Inventory Reports</h2>
+            <h2 class="text-xl font-semibold">{{ __('messages.inventory_reports') }}</h2>
             <div class="text-lg">
-                Total Quantity: <span class="font-semibold">{{ $totalQuantity }}</span>
+                {{ __('messages.total_quantity') }}: <span class="font-semibold">{{ $totalQuantity }}</span>
             </div>
         </div>
 
         <div class="mb-4 flex gap-4">
-            <input type="text" wire:model.live="search" placeholder="Search items..." class="rounded-md">
+            <input type="text" wire:model.live="search" placeholder="{{ __('messages.search_items') }}" class="rounded-md">
             <select wire:model.live="category" class="rounded-md">
-                <option value="">All Categories</option>
+                <option value="">{{ __('messages.all_categories') }}</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="subcategory" class="rounded-md">
-                <option value="">All Subcategories</option>
+                <option value="">{{ __('messages.all_subcategories') }}</option>
                 @foreach($subcategories as $subcat)
                     <option value="{{ $subcat->id }}">{{ $subcat->name }}</option>
                 @endforeach
@@ -28,12 +28,12 @@
             <table class="min-w-full bg-white rounded-lg">
                 <thead>
                     <tr>
-                        <th class="px-4 py-2">Code</th>
-                        <th class="px-4 py-2">Name</th>
-                        <th class="px-4 py-2">Category</th>
-                        <th class="px-4 py-2">Subcategory</th>
-                        <th class="px-4 py-2">Quantity</th>
-                        <th class="px-4 py-2">Unit</th>
+                        <th class="px-4 py-2">{{ __('messages.code') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.name') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.category') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.subcategory') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.quantity') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.unit') }}</th>
                     </tr>
                 </thead>
                 <tbody>

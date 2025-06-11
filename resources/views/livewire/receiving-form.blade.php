@@ -185,7 +185,7 @@
                                         <span class="text-red-500 text-xs">{{ $message }}</span> 
                                     @enderror
                                 </td>
-                                <td class="py-2 px-4 border text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ number_format($selectedItems[$index]['quantity'] * $selectedItems[$index]['unit_price'], 2) }}
+                                <td class="py-2 px-4 border text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ is_numeric($selectedItems[$index]['quantity']) && is_numeric($selectedItems[$index]['unit_price']) ? number_format($selectedItems[$index]['quantity'] * $selectedItems[$index]['unit_price'], 2) : '0.00' }}
                                 </td>
                                 <td class="py-2 px-4 border text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                     <button type="button" wire:click="removeItem({{ $index }})"

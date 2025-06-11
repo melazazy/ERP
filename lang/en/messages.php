@@ -58,7 +58,45 @@ return [
     'trust_search' => 'Trust Search',
     'export_reports' => 'Export Reports',
     'inventory_reports' => 'Inventory Reports',
-    'department_report' => 'Department Report',
+    'department_report' => [
+        'title' => 'Department Report',
+        'filters' => [
+            'department' => 'Department',
+            'select_department' => 'Select Department',
+            'document_type' => 'Document Type',
+            'all_documents' => 'All Documents',
+            'receivings_only' => 'Receivings Only',
+            'requisitions_only' => 'Requisitions Only',
+            'from_date' => 'From Date',
+            'to_date' => 'To Date',
+            'doc_number' => 'Document Number',
+            'search_doc' => 'Search by document number'
+        ],
+        'loading' => 'Loading report...',
+        'generate_report' => 'Generate Report',
+        'receivings' => [
+            'title' => 'Receivings',
+            'date' => 'Date',
+            'doc_number' => 'Doc Number',
+            'item' => 'Item',
+            'supplier' => 'Supplier',
+            'quantity' => 'Quantity',
+            'unit_price' => 'Unit Price',
+            'total' => 'Total',
+            'no_data' => 'No receivings found for this period'
+        ],
+        'requisitions' => [
+            'title' => 'Requisitions',
+            'date' => 'Date',
+            'doc_number' => 'Doc Number',
+            'item' => 'Item',
+            'requested_by' => 'Requested By',
+            'quantity' => 'Quantity',
+            'status' => 'Status',
+            'no_data' => 'No requisitions found for this period'
+        ],
+        'no_data_period' => 'No data found for the selected period'
+    ],
     'document_search' => 'Document Search',
     'item_card' => 'Item Card',
     'item_monitor' => 'Item Monitor',
@@ -249,6 +287,13 @@ return [
     'total_amount' => 'Total Amount',
     
     // Common for all search pages
+    'all_categories' => 'All Categories',
+    'all_subcategories' => 'All Subcategories',
+    'category' => 'Category',
+    'subcategory' => 'Subcategory',
+    'name' => 'Name',
+    'code' => 'Code',
+    'quantity' => 'Quantity',
     'item_name' => 'Item Name',
     'item_description' => 'Item Description',
     'unit_price' => 'Unit Price',
