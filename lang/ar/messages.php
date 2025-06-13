@@ -358,8 +358,8 @@ return [
     'login_here' => 'سجّل الدخول من هنا', // More direct imperative
 
     // Hero Section
-    'streamline_inventory_management' => 'تبسيط إدارة المخزون بفعالية', // Added "بفعالية" (effectively)
-    'comprehensive_erp_system_description' => 'نظام ERP متكامل مصمم لتحسين عملياتك، وزيادة الكفاءة، وتقليل التكاليف بذكاء.', // Added "بذكاء" (intelligently/smartly)
+    'streamline_inventory_management' => 'إدارة المخزون بفعالية', // Added "بفعالية" (effectively)
+    'comprehensive_erp_system_description' => 'نظام ERP قوي وسهل مصمم لتبسيط عمليات إدارة المخزون الخاصة بك. يقدم حلنا تحكمًا كاملاً في الأصناف والطلبات وعمليات الاستلام، مع ميزات متقدمة لإدارة الموردين وتنسيق الأقسام والتقارير التفصيلية. استمتع بالتكامل السلس بين جميع جوانب سير عمل المخزون الخاص بك، من تتبع الأصناف إلى الموافقات على الطلبات، مدعومًا بقدرات بحث قوية وخيارات تصدير بيانات شاملة.',
 
     // Features Section
     'powerful_features' => 'ميزات قوية لإدارة شاملة للمخزون',
@@ -453,4 +453,25 @@ return [
     'status_details' => 'تفاصيل الحالة',
     'trust' => 'العهدة',
     'no_documents_found' => 'لم يتم العثور على مستندات',
+    // Feature Titles
+    'items_management' => 'إدارة الأصناف',
+    'receiving_management' => 'إدارة الاستلام',
+    'requisition_management' => 'إدارة الطلبات',
+    'department_management' => 'إدارة الأقسام',
+    'supplier_management' => 'إدارة الموردين',
+    'category_management' => 'إدارة التصنيفات',
+    'reports_management' => 'التقارير والتحليلات',
+    'advanced_search' => 'البحث المتقدم',
+    'export_import' => 'التصدير والاستيراد',
+    
+    // Feature Descriptions
+    'items_management_description' => 'تتبع شامل للأصناف مع معلومات تفصيلية ومستويات المخزون وإدارة الوحدات.',
+    'receiving_management_description' => 'إدارة فعالة لعملية الاستلام مع تتبع الموردين والتحقق من الأصناف.',
+    'requisition_management_description' => 'نظام طلبات مبسط للأقسام مع سير عمل الموافقات.',
+    'department_management_description' => 'تنظيم وإدارة الأقسام مع صلاحيات الوصول وتتبع الطلبات.',
+    'supplier_management_description' => 'إدارة كاملة لمعلومات الموردين مع تفاصيل الاتصال وسجل الاستلام.',
+    'category_management_description' => 'تنظيم الأصناف باستخدام التصنيفات والفئات الفرعية لإدارة أفضل للمخزون.',
+    'reports_management_description' => 'إنشاء تقارير تفصيلية لمستويات المخزون والطلبات وسجل الاستلام وأداء الموردين.',
+    'advanced_search_description' => 'وظيفة بحث قوية مع فلاتر للأصناف والطلبات وسجلات الاستلام.',
+    'export_import_description' => 'تصدير البيانات إلى Excel/PDF واستيراد الأصناف والتصنيفات بشكل جماعي لإدارة فعالة للبيانات.',
 ];

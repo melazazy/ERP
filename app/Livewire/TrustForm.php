@@ -10,10 +10,12 @@ use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use App\Livewire\QuantityCalculationTrait;
 
 class TrustForm extends Component
 {
     use ItemSearchTrait;
+    use QuantityCalculationTrait;
 
     public $trusts;
     public $requisitionNumber;  // Add requisition number
@@ -169,7 +171,7 @@ class TrustForm extends Component
                 'name' => $item['name'],
                 'code' => $item['code'],
                 'quantity' => 1,  // Default quantity
-                'possible_amount' => $item['available_quantity'],
+                'available_quantity' => $this->calculatePossibleAmount($item['id']),
             ];
             $this->itemSearch = '';  // Clear the search input
             $this->searchAllItems();  // Reset the items list

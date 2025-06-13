@@ -92,19 +92,19 @@
                 <div class="mt-2 bg-white border border-gray-300 rounded-lg shadow-md max-h-60 overflow-y-auto">
                     @forelse ($items as $item)
                         <div wire:click="selectItem({{ $item['id'] }})"
-                            class="px-4 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0 {{ $item['available_quantity'] <= 0 ? 'opacity-60' : '' }}">
+                            class="px-4 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0 {{ $this->calculatePossibleAmount($item['id']) <= 0 ? 'opacity-60' : '' }}">
                             <div class="flex items-center">
                                 <span class="font-medium">{{ $item['name'] }}</span>
                                 <span class="text-gray-500 text-sm mr-2">({{ $item['code'] }})</span>
-                                @if($item['available_quantity'] <= 0)
+                                @if($this->calculatePossibleAmount($item['id']) <= 0)
                                     <span class="ml-2 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">
                                         {{ __('messages.out_of_stock') }}
                                     </span>
                                 @endif
                             </div>
-                            @if($item['available_quantity'] > 0)
+                            @if($this->calculatePossibleAmount($item['id']) > 0)
                                 <div class="text-sm text-gray-600">
-                                    {{ $item['available_quantity'] }} {{ __('messages.available') }}
+                                    {{ number_format($this->calculatePossibleAmount($item['id']), 2) }} {{ __('messages.available') }}
                                 </div>
                             @endif
                         </div>
@@ -139,7 +139,7 @@
                                     class="w-20 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </td>
                             <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
-                                <span>{{ $item['possible_amount'] }}</span> <!-- Display possible amount -->
+                                <span>{{ number_format($this->calculatePossibleAmount($item['id']), 2) }}</span>
                             </td>
                             <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                 <button type="button" wire:click="removeSelectedItem({{ $index }})"

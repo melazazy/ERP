@@ -425,7 +425,7 @@ return [
  
      // Hero Section
      'streamline_inventory_management' => 'Streamline Your Inventory Management',
-     'comprehensive_erp_system_description' => 'A comprehensive ERP system designed to optimize your inventory operations, increase efficiency, and reduce costs.',
+     'comprehensive_erp_system_description' => 'A powerful and intuitive ERP system designed to streamline your inventory management processes. Our solution offers complete control over items, requisitions, and receiving operations, with advanced features for supplier management, department coordination, and detailed reporting. Experience seamless integration between all aspects of your inventory workflow, from item tracking to requisition approvals, backed by robust search capabilities and comprehensive data export options.',
  
      // Features Section
      'powerful_features' => 'Powerful Features for Complete Inventory Control',
@@ -519,4 +519,26 @@ return [
     'status_details' => 'Status Details',
     'trust' => 'Trust',
     'no_documents_found' => 'No documents found',
+
+    // Feature Titles
+    'items_management' => 'Items Management',
+    'receiving_management' => 'Receiving Management',
+    'requisition_management' => 'Requisition Management',
+    'department_management' => 'Department Management',
+    'supplier_management' => 'Supplier Management',
+    'category_management' => 'Category Management',
+    'reports_management' => 'Reports & Analytics',
+    'advanced_search' => 'Advanced Search',
+    'export_import' => 'Export & Import',
+    
+    // Feature Descriptions
+    'items_management_description' => 'Comprehensive item tracking with detailed information, stock levels, and unit management.',
+    'receiving_management_description' => 'Efficient receiving process management with supplier tracking and item verification.',
+    'requisition_management_description' => 'Streamlined requisition system for departments to request items with approval workflows.',
+    'department_management_description' => 'Organize and manage departments with role-based access and requisition tracking.',
+    'supplier_management_description' => 'Complete supplier information management with contact details and receiving history.',
+    'category_management_description' => 'Organize items with categories and subcategories for better inventory management.',
+    'reports_management_description' => 'Generate detailed reports for inventory levels, requisitions, receiving history, and supplier performance.',
+    'advanced_search_description' => 'Powerful search functionality with filters for items, requisitions, and receiving records.',
+    'export_import_description' => 'Export data to Excel/PDF and import items and categories in bulk for efficient data management.',
 ];
