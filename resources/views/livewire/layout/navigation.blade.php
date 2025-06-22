@@ -180,6 +180,9 @@ new class extends Component {
                         <x-dropdown-link :href="route('management.departments')" wire:navigate>
                             {{ __('messages.departments') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('department-management')" wire:navigate>
+                            {{ __('messages.department_management') }}
+                        </x-dropdown-link>
                         <x-dropdown-link :href="route('management.suppliers')" wire:navigate>
                             {{ __('messages.suppliers') }}
                         </x-dropdown-link>
@@ -191,6 +194,12 @@ new class extends Component {
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('backup-manager')" wire:navigate>
                             {{ __('messages.backup_manager') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                            {{ __('messages.profile') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('management.roles')" wire:navigate>
+                            {{ __('messages.roles') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('logout')">
                             {{ __('messages.logout') }}
@@ -291,6 +300,9 @@ new class extends Component {
             <x-responsive-nav-link :href="route('management.departments')" :active="request()->routeIs('management.departments')" wire:navigate>
                 {{ __('messages.departments') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('department-management')" :active="request()->routeIs('department-management')" wire:navigate>
+                {{ __('messages.department_management') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('management.suppliers')" :active="request()->routeIs('management.suppliers')" wire:navigate>
                 {{ __('messages.suppliers') }}
             </x-responsive-nav-link>
@@ -300,8 +312,14 @@ new class extends Component {
             <x-responsive-nav-link :href="route('management-subcategory')" :active="request()->routeIs('management-subcategory')" wire:navigate>
                 {{ __('messages.subcategories') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('profile')" :active="request()->routeIs('profile')" wire:navigate>
+                {{ __('messages.profile') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('backup-manager')" :active="request()->routeIs('backup-manager')" wire:navigate>
                 {{ __('messages.backup_manager') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('management.roles')" :active="request()->routeIs('management.roles')" wire:navigate>
+                {{ __('messages.roles') }}
             </x-responsive-nav-link>
         </div>
 
