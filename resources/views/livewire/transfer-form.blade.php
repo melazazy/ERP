@@ -68,7 +68,6 @@
                 <thead class="bg-gray-200">
                     <tr>
                         <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.item') }}</th>
-                        <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.unit') }}</th>
                         <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.quantity') }}</th>
                         <th class="py-3 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">{{ __('messages.action') }}</th>
                     </tr>
@@ -77,18 +76,6 @@
                     @foreach ($selectedItems as $index => $item)
                         <tr class="hover:bg-gray-50">
                             <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">{{ $item['item_name'] }}</td>
-                            <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
-                                <select wire:model.live="selectedItems.{{ $index }}.unit_id" 
-                                    class="shadow border rounded w-full py-1 {{ app()->getLocale() === 'ar' ? 'pr-3 pl-8 text-right' : 'pl-3 pr-8 text-left' }}">
-                                    <option value="">{{ __('messages.select_unit') }}</option>
-                                    @foreach($units as $unit)
-                                        <option value="{{ $unit['id'] }}">{{ $unit['name'] }}</option>
-                                    @endforeach
-                                </select>
-                                @error("selectedItems.{$index}.unit_id") 
-                                    <span class="text-red-500 text-xs">{{ $message }}</span>
-                                @enderror
-                            </td>
                             <td class="py-2 px-4 border-b text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}">
                                 <input type="number" step="0.0001"
                                     wire:model="selectedItems.{{ $index }}.quantity"

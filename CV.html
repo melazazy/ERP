@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>السيرة الذاتية - مصطفى أحمد زكي أحمد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            background: #f0f0f0;
+            margin: 0;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            page-break-inside: avoid;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.1);
+            padding: 6px 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            font-size: 0.8rem;
+        }
+
+        .contact-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .main-content {
+            padding: 15px 20px;
+        }
+
+        .section {
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+            position: relative;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: #e74c3c;
+        }
+
+        .objective {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.3);
+        }
+
+        .experience-item, .education-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
+            position: relative;
+        }
+
+        .job-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .company {
+            font-size: 0.9rem;
+            color: #e74c3c;
+            margin-bottom: 2px;
+        }
+
+        .duration {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        .description {
+            color: #555;
+            line-height: 1.3;
+            font-size: 0.85rem;
+        }
+
+        .degree {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .institution {
+            font-size: 0.9rem;
+            color: #e74c3c;
+            margin-bottom: 2px;
+        }
+
+        .grade {
+            background: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .skill-item {
+            background: linear-gradient(135deg, #a8e6cf 0%, #7fcdcd 100%);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .skill-item h3 {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .skill-item p {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .personal-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #f1f2f6;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                width: 100%;
+                min-height: auto;
+                max-height: none;
+            }
+            
+            .header::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                margin: 0;
+            }
+            
+            .name {
+                font-size: 1.4rem;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .personal-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1 class="name">مصطفى أحمد زكي أحمد    |      محاسب</h1>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <svg class="contact-icon" viewBox="0 0 24 24">
+                            <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"/>
+                        </svg>
+                        <span>01010748622</span>
+                    </div>
+                    <div class="contact-item">
+                        <svg class="contact-icon" viewBox="0 0 24 24">
+                            <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"/>
+                        </svg>
+                        <span>mostafama32145@gmail.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <svg class="contact-icon" viewBox="0 0 24 24">
+                            <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"/>
+                        </svg>
+                        <span>قنا - قفط - جسر العويضات</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2 class="section-title">المعلومات الشخصية</h2>
+                <div class="personal-info">
+                    <div class="info-item">
+                        <span class="info-label">تاريخ الميلاد:</span>
+                        <span class="info-value">25/10/1998</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">الجنسية:</span>
+                        <span class="info-value">مصري</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">الحالة الاجتماعية:</span>
+                        <span class="info-value">أعزب</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">الهدف المهني</h2>
+                <div class="objective">
+                    أطمح إلى العمل في بيئة احترافية تتيح لي تطوير مهاراتي والمساهمة بخبرتي في تحسين الأداء المؤسسي.
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">الخبرات العملية</h2>
+                <div class="experience-item">
+                    <div class="job-title">أمين مخزن (جنرل)</div>
+                    <div class="company">شركة الجنوب للمنشآت السياحية</div>
+                    <div class="duration">فبراير 2024 - نوفمبر 2024</div>
+                    <div class="description">
+                        إدارة المخزون العام للشركة، تنظيم عمليات الاستقبال والصرف، ضمان توفر المواد وفقاً للمعايير المطلوبة.
+                    </div>
+                </div>
+                <div class="experience-item">
+                    <div class="job-title">أمين مخزن</div>
+                    <div class="company">الشركة المصرية للتعدين والجبس الزراعي</div>
+                    <div class="duration">مارس 2021 - يوليو 2024</div>
+                    <div class="description">
+                        إدارة مخزون المواد الخام والمنتجات النهائية، تنسيق عمليات التوريد والتسليم، ضمان جودة المنتجات المخزنة.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">المؤهلات التعليمية</h2>
+                <div class="education-item">
+                    <div class="degree">بكالوريوس تجارة - شعبة محاسبة</div>
+                    <div class="institution">جامعة جنوب الوادي - قنا</div>
+                    <div class="duration">تخرج عام 2023</div>
+                    <div class="grade">التقدير: 76%</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">الدورات التدريبية والمهارات</h2>
+                <div class="skills-grid">
+                    <div class="skill-item">
+                        <h3>رخصة قيادة الحاسوب الدولية (ICDL)</h3>
+                        <p>محافظة قنا - 2023</p>
+                    </div>
+                    <div class="skill-item">
+                        <h3>إدارة المخازن</h3>
+                        <p>خبرة عملية متميزة</p>
+                    </div>
+                    <div class="skill-item">
+                        <h3>المحاسبة</h3>
+                        <p>تخصص أكاديمي وخبرة عملية</p>
+                    </div>
+                    <div class="skill-item">
+                        <h3>استخدام الحاسوب</h3>
+                        <p>إتقان برامج Microsoft Office</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

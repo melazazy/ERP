@@ -56,7 +56,6 @@ trait ItemSearchTrait
             });
         }
 
-
         // Order by relevance - give higher scores to exact matches and partial matches
         $query->orderByRaw("(
             CASE 
@@ -73,10 +72,8 @@ trait ItemSearchTrait
             '%' . $searchTerm . '%'   // Partial code match
         ]);
 
-
-        // Only include items with available quantity > 0
-        $query->havingRaw('(COALESCE(SUM(receivings.quantity), 0) - (COALESCE(SUM(requisitions.quantity), 0) + COALESCE(SUM(trusts.quantity), 0))) >= 0');
-
+        // Remove the having clause to include all items regardless of available quantity
+        // This ensures items with zero or negative available quantity are still searchable
         return $query
             ->limit($limit)
             ->get()

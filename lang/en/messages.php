@@ -572,4 +572,12 @@ return [
     'deactivate' => 'Deactivate',
     'roles' => 'Roles',
     'profile' => 'Profile',
+    'filter_by_category' => 'Filter by Category',
+    'filter_by_subcategory' => 'Filter by Subcategory',
+    'filter_by_name_or_code' => 'Filter by Name or Code',
+    'download_items_csv' => 'Download Items as CSV',
+    'select_category' => 'Select Category',
+    'select_subcategory' => 'Select Subcategory',
+    'update_item' => 'Update Item',
+    'actions' => 'Actions',
 ];

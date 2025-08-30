@@ -29,6 +29,7 @@ use App\Http\Controllers\LocaleController;
 use App\Livewire\TransactionDetails;
 use App\Livewire\ManagementRoles;
 use App\Http\Controllers\ProfileController;
+use App\Livewire\ItemsReport;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,6 +110,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('supplier-reports', SupplierReport::class)->name('supplier-reports');
         Route::get('export-reports', ExportReports::class)->name('export-reports');
     });
+    
+    Route::get('items-report', ItemsReport::class)->name('items-report');
     
     // Department Management Routes (System Administrator, Department Manager)
     Route::middleware('role:System Administrator,Department Manager')->group(function () {

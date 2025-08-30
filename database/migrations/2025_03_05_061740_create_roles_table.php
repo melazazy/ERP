@@ -16,11 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->timestamps();
         });
-
-        // Add role_id to users table
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable()->constrained()->onDelete('set null');
-        });
     }
 
     /**
@@ -28,11 +23,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id']);
-            $table->dropColumn('role_id');
-        });
-        
         Schema::dropIfExists('roles');
     }
 };

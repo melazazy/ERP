@@ -72,7 +72,12 @@
                             @foreach($movements as $index => $movement)
                                 <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
                                     <td class="px-6 py-3 text-sm text-gray-900 border {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">{{ date('d/m/Y', strtotime($movement['date'])) }}</td>
-                                    <td class="px-6 py-3 text-sm text-gray-900 border {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">{{ $movement['document_number'] }}</td>
+                                    <td class="px-6 py-3 text-sm text-gray-900 border {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">
+                                        <a href="{{ route('transaction.details', ['type' => $movement['transaction_type'], 'number' => $movement['document_number']]) }}" 
+                                           class="text-blue-600 hover:text-blue-800 underline cursor-pointer">
+                                            {{ $movement['document_number'] }}
+                                        </a>
+                                    </td>
                                     <td class="px-6 py-3 text-sm text-gray-900 border {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">{{ $movement['description'] }}</td>
                                     <td class="px-6 py-3 text-sm border text-center {{ $movement['in'] ? 'text-red-600 font-medium' : 'text-gray-900' }}">
                                         {{ $movement['in'] ? number_format($movement['in'], 2) : '-' }}

@@ -505,4 +505,12 @@ return [
     'deactivate' => 'تعطيل',
     'roles' => 'الأدوار',
     'profile' => 'الملف الشخصي',
+    'filter_by_category' => 'تصفية حسب التصنيف',
+    'filter_by_subcategory' => 'تصفية حسب التصنيف الفرعي',
+    'filter_by_name_or_code' => 'تصفية بالاسم أو الكود',
+    'download_items_csv' => 'تحميل الأصناف كملف CSV',
+    'select_category' => 'اختر التصنيف',
+    'select_subcategory' => 'اختر التصنيف الفرعي',
+    'update_item' => 'تحديث الصنف',
+    'actions' => 'الإجراءات',
 ];

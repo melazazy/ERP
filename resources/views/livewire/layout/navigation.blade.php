@@ -2,6 +2,7 @@
 
 use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
     /**
@@ -12,6 +13,187 @@ new class extends Component {
         $logout();
 
         $this->redirect('/', navigate: true);
+    }
+
+    /**
+     * Check if user can access a specific permission
+     */
+    public function canAccess($permission, $specificOperation = null)
+    {
+        $user = Auth::user();
+        
+        if (!$user || !$user->role) {
+            return false;
+        }
+
+        $permissions = $this->getPermissionsByRole($user->role->name);
+        
+        if (!isset($permissions[$permission])) {
+            return false;
+        }
+
+        $permissionValue = $permissions[$permission];
+        
+        // If permission is boolean, return it directly
+        if (is_bool($permissionValue)) {
+            return $permissionValue;
+        }
+        
+        // If permission is array and specific operation is requested
+        if (is_array($permissionValue) && $specificOperation) {
+            return in_array($specificOperation, $permissionValue);
+        }
+        
+        // If permission is array but no specific operation, check if array is not empty
+        if (is_array($permissionValue)) {
+            return !empty($permissionValue);
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if dropdown should be shown based on available operations
+     */
+    public function shouldShowDropdown($permission)
+    {
+        $user = Auth::user();
+        
+        if (!$user || !$user->role) {
+            return false;
+        }
+
+        $permissions = $this->getPermissionsByRole($user->role->name);
+        
+        if (!isset($permissions[$permission])) {
+            return false;
+        }
+
+        $permissionValue = $permissions[$permission];
+        
+        // If permission is true, show dropdown
+        if ($permissionValue === true) {
+            return true;
+        }
+        
+        // If permission is array and not empty, show dropdown
+        if (is_array($permissionValue) && !empty($permissionValue)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Get permissions based on user role
+     */
+    private function getPermissionsByRole($roleName)
+    {
+        $rolePermissions = [
+            'System Administrator' => [
+                'inventory_operations' => true,
+                'items_management' => true,
+                'search_operations' => true,
+                'reports_access' => true,
+                'user_management' => true,
+                'role_management' => true,
+                'backup_management' => true,
+                'profile_access' => true,
+            ],
+            'Warehouse Manager' => [
+                'inventory_operations' => true,
+                'items_management' => true,
+                'search_operations' => true,
+                'reports_access' => true,
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Receiving Clerk' => [
+                'inventory_operations' => ['receiving', 'receiving_search'],
+                'items_management' => false,
+                'search_operations' => ['receiving_search'],
+                'reports_access' => false,
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Requisition Clerk' => [
+                'inventory_operations' => ['requisition', 'transfer'],
+                'items_management' => false,
+                'search_operations' => ['requisition_search'],
+                'reports_access' => false,
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Trust Clerk' => [
+                'inventory_operations' => ['trusts'],
+                'items_management' => false,
+                'search_operations' => ['trust_search'],
+                'reports_access' => false,
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Inventory Controller' => [
+                'inventory_operations' => false,
+                'items_management' => ['item_monitor', 'item_report'],
+                'search_operations' => false,
+                'reports_access' => ['inventory_reports', 'department_reports', 'supplier_reports', 'export_reports'],
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Store Keeper' => [
+                'inventory_operations' => false,
+                'items_management' => ['item_monitor', 'item_report'],
+                'search_operations' => false,
+                'reports_access' => false,
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Accountant' => [
+                'inventory_operations' => false,
+                'items_management' => false,
+                'search_operations' => false,
+                'reports_access' => ['inventory_reports', 'department_reports', 'supplier_reports', 'export_reports'],
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Auditor' => [
+                'inventory_operations' => false,
+                'items_management' => false,
+                'search_operations' => false,
+                'reports_access' => ['inventory_reports', 'department_reports', 'supplier_reports', 'export_reports'],
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+            ],
+            'Department Manager' => [
+                'inventory_operations' => false,
+                'items_management' => false,
+                'search_operations' => false,
+                'reports_access' => false,
+                'user_management' => false,
+                'role_management' => false,
+                'backup_management' => false,
+                'profile_access' => true,
+                'department_management' => true,
+            ],
+        ];
+
+        return $rolePermissions[$roleName] ?? [];
     }
 }; ?>
 
@@ -29,183 +211,229 @@ new class extends Component {
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex sm:items-center">
                     <!-- Inventory Operations -->
-                    <x-dropdown align="left" width="48">
-                        <x-slot name="trigger">
-                            <button
-                                class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('messages.inventory') }}</div>
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('receiving')" wire:navigate>
-                                {{ __('messages.receiving') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('requisition')" wire:navigate>
-                                {{ __('messages.requisition') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('trusts')" wire:navigate>
-                                {{ __('messages.trusts') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('transfer')" wire:navigate>
-                                {{ __('messages.transfer') }}
-                            </x-dropdown-link>
-                        </x-slot>
-                    </x-dropdown>
+                    @if($this->shouldShowDropdown('inventory_operations'))
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button
+                                    class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                    <div>{{ __('messages.inventory') }}</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                @if($this->canAccess('inventory_operations', 'receiving'))
+                                    <x-dropdown-link :href="route('receiving')" wire:navigate>
+                                        {{ __('messages.receiving') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('inventory_operations', 'requisition'))
+                                    <x-dropdown-link :href="route('requisition')" wire:navigate>
+                                        {{ __('messages.requisition') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('inventory_operations', 'trusts'))
+                                    <x-dropdown-link :href="route('trusts')" wire:navigate>
+                                        {{ __('messages.trusts') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('inventory_operations', 'transfer'))
+                                    <x-dropdown-link :href="route('transfer')" wire:navigate>
+                                        {{ __('messages.transfer') }}
+                                    </x-dropdown-link>
+                                @endif
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
 
                     <!-- Items -->
-                    <x-dropdown align="left" width="48">
-                        <x-slot name="trigger">
-                            <button
-                                class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('messages.items') }}</div>
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('item-card')" wire:navigate>
-                                {{ __('messages.item_card') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('item-monitor')" wire:navigate>
-                                {{ __('messages.item_monitor') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('item-report')" wire:navigate>
-                                {{ __('messages.item_report') }}
-                            </x-dropdown-link>
-                        </x-slot>
-                    </x-dropdown>
+                    @if($this->shouldShowDropdown('items_management'))
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button
+                                    class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                    <div>{{ __('messages.items') }}</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('item-card')" wire:navigate>
+                                    {{ __('messages.item_card') }}
+                                </x-dropdown-link>
+                                @if($this->canAccess('items_management', 'item_monitor'))
+                                    <x-dropdown-link :href="route('item-monitor')" wire:navigate>
+                                        {{ __('messages.item_monitor') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('items_management', 'item_report'))
+                                    <x-dropdown-link :href="route('item-report')" wire:navigate>
+                                        {{ __('messages.item_report') }}
+                                    </x-dropdown-link>
+                                @endif
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
 
                     <!-- Search -->
-                    <x-dropdown align="left" width="48">
-                        <x-slot name="trigger">
-                            <button
-                                class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('messages.search') }}</div>
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('receiving-search')" wire:navigate>
-                                {{ __('messages.receiving_search') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('requisition-search')" wire:navigate>
-                                {{ __('messages.requisition_search') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('trust-search')" wire:navigate>
-                                {{ __('messages.trust_search') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('document-search')" wire:navigate>
-                                {{ __('messages.document_search') }}
-                            </x-dropdown-link>
-                        </x-slot>
-                    </x-dropdown>
+                    @if($this->shouldShowDropdown('search_operations') || $this->shouldShowDropdown('inventory_operations'))
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button
+                                    class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                    <div>{{ __('messages.search') }}</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                @if($this->canAccess('inventory_operations', 'receiving_search') || $this->canAccess('search_operations', 'receiving_search'))
+                                    <x-dropdown-link :href="route('receiving-search')" wire:navigate>
+                                        {{ __('messages.receiving_search') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('inventory_operations', 'requisition_search') || $this->canAccess('search_operations', 'requisition_search'))
+                                    <x-dropdown-link :href="route('requisition-search')" wire:navigate>
+                                        {{ __('messages.requisition_search') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('inventory_operations', 'trust_search') || $this->canAccess('search_operations', 'trust_search'))
+                                    <x-dropdown-link :href="route('trust-search')" wire:navigate>
+                                        {{ __('messages.trust_search') }}
+                                    </x-dropdown-link>
+                                @endif
+                                <x-dropdown-link :href="route('document-search')" wire:navigate>
+                                    {{ __('messages.document_search') }}
+                                </x-dropdown-link>
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
 
                     <!-- Reports -->
-                    <x-dropdown align="left" width="48">
-                        <x-slot name="trigger">
-                            <button
-                                class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ __('messages.reports') }}</div>
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('export-reports')" wire:navigate>
-                                {{ __('messages.export_reports') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('inventory-reports')" wire:navigate>
-                                {{ __('messages.inventory_reports') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('department-reports')" wire:navigate>
-                                {{ __('messages.department_report.title') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('supplier-reports')" wire:navigate>
-                                {{ __('messages.supplier_report') }}
-                            </x-dropdown-link>
-                        </x-slot>
-                    </x-dropdown>
+                    @if($this->shouldShowDropdown('reports_access'))
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button
+                                    class="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                    <div>{{ __('messages.reports') }}</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                @if($this->canAccess('reports_access', 'export_reports'))
+                                    <x-dropdown-link :href="route('export-reports')" wire:navigate>
+                                        {{ __('messages.export_reports') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('reports_access', 'inventory_reports'))
+                                    <x-dropdown-link :href="route('inventory-reports')" wire:navigate>
+                                        {{ __('messages.inventory_reports') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('reports_access', 'department_reports'))
+                                    <x-dropdown-link :href="route('department-reports')" wire:navigate>
+                                        {{ __('messages.department_report.title') }}
+                                    </x-dropdown-link>
+                                @endif
+                                @if($this->canAccess('reports_access', 'supplier_reports'))
+                                    <x-dropdown-link :href="route('supplier-reports')" wire:navigate>
+                                        {{ __('messages.supplier_report') }}
+                                    </x-dropdown-link>
+                                @endif
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
                 </div>
             </div>
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Language Switcher -->
                 <livewire:language-switcher />
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button
-                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            {{ __('messages.management') }}
-                            <svg class="fill-current h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </x-slot>
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('management.items')" wire:navigate>
-                            {{ __('messages.items') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('management.users')" wire:navigate>
-                            {{ __('messages.users') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('management.departments')" wire:navigate>
-                            {{ __('messages.departments') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('department-management')" wire:navigate>
-                            {{ __('messages.department_management') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('management.suppliers')" wire:navigate>
-                            {{ __('messages.suppliers') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('management-category')" wire:navigate>
-                            {{ __('messages.categories') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('management-subcategory')" wire:navigate>
-                            {{ __('messages.subcategories') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('backup-manager')" wire:navigate>
-                            {{ __('messages.backup_manager') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('messages.profile') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('management.roles')" wire:navigate>
-                            {{ __('messages.roles') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('logout')">
-                            {{ __('messages.logout') }}
-                        </x-dropdown-link>
-                    </x-slot>
-                </x-dropdown>
+                @if($this->shouldShowDropdown('user_management') || $this->shouldShowDropdown('role_management') || $this->shouldShowDropdown('backup_management') || $this->shouldShowDropdown('profile_access') || $this->shouldShowDropdown('department_management'))
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                {{ __('messages.management') }}
+                                <svg class="fill-current h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            @if($this->canAccess('user_management'))
+                                <x-dropdown-link :href="route('management.items')" wire:navigate>
+                                    {{ __('messages.items') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('management.users')" wire:navigate>
+                                    {{ __('messages.users') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('management.departments')" wire:navigate>
+                                    {{ __('messages.departments') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('management.suppliers')" wire:navigate>
+                                    {{ __('messages.suppliers') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('management-category')" wire:navigate>
+                                    {{ __('messages.categories') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('management-subcategory')" wire:navigate>
+                                    {{ __('messages.subcategories') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if($this->canAccess('department_management'))
+                                <x-dropdown-link :href="route('department-management')" wire:navigate>
+                                    {{ __('messages.department_management') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if($this->canAccess('backup_management'))
+                                <x-dropdown-link :href="route('backup-manager')" wire:navigate>
+                                    {{ __('messages.backup_manager') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if($this->canAccess('profile_access'))
+                                <x-dropdown-link :href="route('profile')" wire:navigate>
+                                    {{ __('messages.profile') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if($this->canAccess('role_management'))
+                                <x-dropdown-link :href="route('management.roles')" wire:navigate>
+                                    {{ __('messages.roles') }}
+                                </x-dropdown-link>
+                            @endif
+                            <x-dropdown-link :href="route('logout')">
+                                {{ __('messages.logout') }}
+                            </x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
+                @endif
             </div>
 
             <!-- Hamburger -->
@@ -233,94 +461,138 @@ new class extends Component {
             </x-responsive-nav-link>
 
             <!-- Inventory Section -->
-            <div class="px-3 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.inventory') }}</div>
-            <x-responsive-nav-link :href="route('receiving')" :active="request()->routeIs('receiving')" wire:navigate>
-                {{ __('messages.receiving') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('requisition')" :active="request()->routeIs('requisition')" wire:navigate>
-                {{ __('messages.requisition') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('trusts')" :active="request()->routeIs('trusts')" wire:navigate>
-                {{ __('messages.trusts') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('transfer')" :active="request()->routeIs('transfer')" wire:navigate>
-                {{ __('messages.transfer') }}
-            </x-responsive-nav-link>
+            @if($this->shouldShowDropdown('inventory_operations'))
+                <div class="px-3 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.inventory') }}</div>
+                @if($this->canAccess('inventory_operations', 'receiving'))
+                    <x-responsive-nav-link :href="route('receiving')" :active="request()->routeIs('receiving')" wire:navigate>
+                        {{ __('messages.receiving') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('inventory_operations', 'requisition'))
+                    <x-responsive-nav-link :href="route('requisition')" :active="request()->routeIs('requisition')" wire:navigate>
+                        {{ __('messages.requisition') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('inventory_operations', 'trusts'))
+                    <x-responsive-nav-link :href="route('trusts')" :active="request()->routeIs('trusts')" wire:navigate>
+                        {{ __('messages.trusts') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('inventory_operations', 'transfer'))
+                    <x-responsive-nav-link :href="route('transfer')" :active="request()->routeIs('transfer')" wire:navigate>
+                        {{ __('messages.transfer') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endif
 
             <!-- Items Section -->
-            <div class="px-3 mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.items') }}
-            </div>
-            <x-responsive-nav-link :href="route('item-card')" :active="request()->routeIs('item-card')" wire:navigate>
-                {{ __('messages.item_card') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('item-monitor')" :active="request()->routeIs('item-monitor')" wire:navigate>
-                {{ __('messages.item_monitor') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('item-report')" :active="request()->routeIs('item-report')" wire:navigate>
-                {{ __('messages.item_report') }}
-            </x-responsive-nav-link>
+            @if($this->shouldShowDropdown('items_management'))
+                <div class="px-3 mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.items') }}
+                </div>
+                <x-responsive-nav-link :href="route('item-card')" :active="request()->routeIs('item-card')" wire:navigate>
+                    {{ __('messages.item_card') }}
+                </x-responsive-nav-link>
+                @if($this->canAccess('items_management', 'item_monitor'))
+                    <x-responsive-nav-link :href="route('item-monitor')" :active="request()->routeIs('item-monitor')" wire:navigate>
+                        {{ __('messages.item_monitor') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('items_management', 'item_report'))
+                    <x-responsive-nav-link :href="route('item-report')" :active="request()->routeIs('item-report')" wire:navigate>
+                        {{ __('messages.item_report') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endif
 
             <!-- Reports Section -->
-            <div class="px-3 mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.reports') }}
-            </div>
-            <x-responsive-nav-link :href="route('receiving-search')" :active="request()->routeIs('receiving-search')" wire:navigate>
-                {{ __('messages.receiving_search') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('requisition-search')" :active="request()->routeIs('requisition-search')" wire:navigate>
-                {{ __('messages.requisition_search') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('trust-search')" :active="request()->routeIs('trust-search')" wire:navigate>
-                {{ __('messages.trust_search') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('export-reports')" :active="request()->routeIs('export-reports')" wire:navigate>
-                {{ __('messages.export_reports') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('inventory-reports')" :active="request()->routeIs('inventory-reports')" wire:navigate>
-                {{ __('messages.inventory_reports') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('department-reports')" :active="request()->routeIs('department-reports')" wire:navigate>
-                {{ __('messages.department_report.title') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('document-search')" :active="request()->routeIs('document-search')" wire:navigate>
-                {{ __('messages.document_search') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('supplier-reports')" :active="request()->routeIs('supplier-reports')" wire:navigate>
-                {{ __('messages.supplier_report') }}
-            </x-responsive-nav-link>
+            @if($this->shouldShowDropdown('reports_access') || $this->shouldShowDropdown('search_operations') || $this->shouldShowDropdown('inventory_operations'))
+                <div class="px-3 mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.reports') }}
+                </div>
+                @if($this->canAccess('inventory_operations', 'receiving_search') || $this->canAccess('search_operations', 'receiving_search'))
+                    <x-responsive-nav-link :href="route('receiving-search')" :active="request()->routeIs('receiving-search')" wire:navigate>
+                        {{ __('messages.receiving_search') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('inventory_operations', 'requisition_search') || $this->canAccess('search_operations', 'requisition_search'))
+                    <x-responsive-nav-link :href="route('requisition-search')" :active="request()->routeIs('requisition-search')" wire:navigate>
+                        {{ __('messages.requisition_search') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('inventory_operations', 'trust_search') || $this->canAccess('search_operations', 'trust_search'))
+                    <x-responsive-nav-link :href="route('trust-search')" :active="request()->routeIs('trust-search')" wire:navigate>
+                        {{ __('messages.trust_search') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('reports_access', 'export_reports'))
+                    <x-responsive-nav-link :href="route('export-reports')" :active="request()->routeIs('export-reports')" wire:navigate>
+                        {{ __('messages.export_reports') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('reports_access', 'inventory_reports'))
+                    <x-responsive-nav-link :href="route('inventory-reports')" :active="request()->routeIs('inventory-reports')" wire:navigate>
+                        {{ __('messages.inventory_reports') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('reports_access', 'department_reports'))
+                    <x-responsive-nav-link :href="route('department-reports')" :active="request()->routeIs('department-reports')" wire:navigate>
+                        {{ __('messages.department_report.title') }}
+                    </x-responsive-nav-link>
+                @endif
+                <x-responsive-nav-link :href="route('document-search')" :active="request()->routeIs('document-search')" wire:navigate>
+                    {{ __('messages.document_search') }}
+                </x-responsive-nav-link>
+                @if($this->canAccess('reports_access', 'supplier_reports'))
+                    <x-responsive-nav-link :href="route('supplier-reports')" :active="request()->routeIs('supplier-reports')" wire:navigate>
+                        {{ __('messages.supplier_report') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endif
 
             <!-- Management Section -->
-            <div class="px-3 mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.management') }}
-            </div>
-            <x-responsive-nav-link :href="route('management.items')" :active="request()->routeIs('management.items')" wire:navigate>
-                {{ __('messages.items') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('management.users')" :active="request()->routeIs('management.users')" wire:navigate>
-                {{ __('messages.users') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('management.departments')" :active="request()->routeIs('management.departments')" wire:navigate>
-                {{ __('messages.departments') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('department-management')" :active="request()->routeIs('department-management')" wire:navigate>
-                {{ __('messages.department_management') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('management.suppliers')" :active="request()->routeIs('management.suppliers')" wire:navigate>
-                {{ __('messages.suppliers') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('management-category')" :active="request()->routeIs('management-category')" wire:navigate>
-                {{ __('messages.categories') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('management-subcategory')" :active="request()->routeIs('management-subcategory')" wire:navigate>
-                {{ __('messages.subcategories') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('profile')" :active="request()->routeIs('profile')" wire:navigate>
-                {{ __('messages.profile') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('backup-manager')" :active="request()->routeIs('backup-manager')" wire:navigate>
-                {{ __('messages.backup_manager') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('management.roles')" :active="request()->routeIs('management.roles')" wire:navigate>
-                {{ __('messages.roles') }}
-            </x-responsive-nav-link>
+            @if($this->shouldShowDropdown('user_management') || $this->shouldShowDropdown('role_management') || $this->shouldShowDropdown('backup_management') || $this->shouldShowDropdown('profile_access') || $this->shouldShowDropdown('department_management'))
+                <div class="px-3 mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.management') }}
+                </div>
+                @if($this->canAccess('user_management'))
+                    <x-responsive-nav-link :href="route('management.items')" :active="request()->routeIs('management.items')" wire:navigate>
+                        {{ __('messages.items') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('management.users')" :active="request()->routeIs('management.users')" wire:navigate>
+                        {{ __('messages.users') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('management.departments')" :active="request()->routeIs('management.departments')" wire:navigate>
+                        {{ __('messages.departments') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('management.suppliers')" :active="request()->routeIs('management.suppliers')" wire:navigate>
+                        {{ __('messages.suppliers') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('management-category')" :active="request()->routeIs('management-category')" wire:navigate>
+                        {{ __('messages.categories') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('management-subcategory')" :active="request()->routeIs('management-subcategory')" wire:navigate>
+                        {{ __('messages.subcategories') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('department_management'))
+                    <x-responsive-nav-link :href="route('department-management')" :active="request()->routeIs('department-management')" wire:navigate>
+                        {{ __('messages.department_management') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('profile_access'))
+                    <x-responsive-nav-link :href="route('profile')" :active="request()->routeIs('profile')" wire:navigate>
+                        {{ __('messages.profile') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('backup_management'))
+                    <x-responsive-nav-link :href="route('backup-manager')" :active="request()->routeIs('backup-manager')" wire:navigate>
+                        {{ __('messages.backup_manager') }}
+                    </x-responsive-nav-link>
+                @endif
+                @if($this->canAccess('role_management'))
+                    <x-responsive-nav-link :href="route('management.roles')" :active="request()->routeIs('management.roles')" wire:navigate>
+                        {{ __('messages.roles') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -334,9 +606,11 @@ new class extends Component {
             @endif
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('messages.profile') }}
-                </x-responsive-nav-link>
+                @if($this->canAccess('profile_access'))
+                    <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                        {{ __('messages.profile') }}
+                    </x-responsive-nav-link>
+                @endif
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">

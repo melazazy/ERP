@@ -1,66 +1,287 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ERP Store Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive Enterprise Resource Planning (ERP) system built with Laravel 11 and Livewire 3, designed for warehouse and inventory management with multi-role access control.
 
-## About Laravel
+## 🚀 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Core Functionality
+- **Inventory Management**: Complete item tracking with categories and subcategories
+- **Receiving Management**: Streamlined goods receiving process
+- **Requisition System**: Internal request and approval workflow
+- **Trust Management**: Trust-based item allocation system
+- **Transfer Management**: Inter-department item transfers
+- **Supplier Management**: Vendor relationship and performance tracking
+- **Department Management**: Organizational structure management
+- **User Role Management**: Multi-level access control system
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Advanced Features
+- **Real-time Monitoring**: Livewire-powered dynamic interfaces
+- **Reporting & Analytics**: Comprehensive inventory and financial reports
+- **Export Capabilities**: PDF and Excel export functionality
+- **Multi-language Support**: Arabic and English localization
+- **Backup Management**: Automated system backup and recovery
+- **Document Search**: Advanced search across all transactions
+- **Dashboard Analytics**: Real-time insights and metrics
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠️ Technology Stack
 
-## Learning Laravel
+### Backend
+- **PHP 8.2+** with **Laravel 11.31**
+- **Livewire 3.6** for reactive components
+- **MySQL 8.0** database
+- **Redis** for caching and sessions
+- **Laravel Sanctum** for API authentication
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Frontend
+- **Tailwind CSS 3.4** for styling
+- **Alpine.js** for interactive components
+- **SweetAlert2** for enhanced user notifications
+- **Vite** for asset compilation
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Additional Packages
+- **Laravel Excel** for data import/export
+- **Laravel DomPDF** for PDF generation
+- **Laravel Backup** for system backup management
+- **Laravel Localization** for multi-language support
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📋 Requirements
 
-## Laravel Sponsors
+- PHP 8.2 or higher
+- Composer 2.0+
+- Node.js 18+ and npm
+- MySQL 8.0+
+- Redis (optional, for enhanced performance)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Installation
 
-### Premium Partners
+### 1. Clone the Repository
+```bash
+git clone <your-repository-url>
+cd ERP-store
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 2. Install Dependencies
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 3. Environment Setup
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Configure your `.env` file with database credentials:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=erp_store
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-## Code of Conduct
+### 4. Database Setup
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Build Assets
+```bash
+npm run build
+```
 
-## Security Vulnerabilities
+### 6. Start the Application
+```bash
+php artisan serve
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🐳 Docker Setup
 
-## License
+The project includes Docker configuration for easy deployment:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# Start all services
+docker-compose up -d
+
+# Access the application
+open http://localhost:8000
+```
+
+## 👥 User Roles & Permissions
+
+### System Administrator
+- Full system access
+- User and role management
+- System backup management
+- All warehouse operations
+
+### Warehouse Manager
+- Inventory management
+- Receiving and requisition oversight
+- Supplier management
+- Department coordination
+
+### Receiving Clerk
+- Goods receiving
+- Receiving search and reports
+- Basic inventory operations
+
+### Requisition Clerk
+- Requisition creation
+- Transfer management
+- Basic reporting access
+
+### Trust Clerk
+- Trust-based allocations
+- Trust management
+- Related reporting
+
+### Inventory Controller
+- Inventory monitoring
+- Item reports
+- Stock level management
+
+### Store Keeper
+- Basic inventory operations
+- Item monitoring
+- Limited reporting access
+
+### Department Manager
+- Department-specific operations
+- Department reporting
+- Basic inventory access
+
+### Accountant
+- Financial reporting
+- Inventory valuation
+- Audit trail access
+
+### Auditor
+- Read-only access to reports
+- Audit trail review
+- Compliance monitoring
+
+## 📊 Database Structure
+
+The system includes the following main entities:
+- **Users** with role-based access control
+- **Items** with category and subcategory classification
+- **Departments** for organizational structure
+- **Suppliers** for vendor management
+- **Receivings** for goods receiving
+- **Requisitions** for internal requests
+- **Trusts** for trust-based allocations
+- **Categories** and **Subcategories** for item classification
+
+## 🔧 Development
+
+### Available Commands
+```bash
+# Development server with all services
+composer run dev
+
+# Code quality checks
+composer run phpcs
+composer run phpcbf
+
+# Testing
+php artisan test
+```
+
+### Code Style
+The project follows PSR-12 coding standards with automatic formatting available through the provided scripts.
+
+## 🌐 Localization
+
+The application supports multiple languages:
+- **English** (default)
+- **Arabic** (RTL support)
+
+Language switching is available through the `LocaleController`.
+
+## 📈 Reporting & Analytics
+
+### Available Reports
+- **Inventory Reports**: Stock levels, movements, and valuations
+- **Department Reports**: Department-specific analytics
+- **Supplier Reports**: Vendor performance and analysis
+- **Item Reports**: Detailed item tracking and history
+- **Export Reports**: Customizable data export options
+
+### Export Formats
+- **PDF**: Using Laravel DomPDF
+- **Excel**: Using Laravel Excel
+
+## 🔒 Security Features
+
+- **Role-based Access Control**: Granular permissions system
+- **Authentication**: Laravel Breeze with email verification
+- **CSRF Protection**: Built-in Laravel security
+- **Input Validation**: Comprehensive request validation
+- **SQL Injection Protection**: Eloquent ORM security
+- **XSS Protection**: Blade template escaping
+
+## 📝 API Documentation
+
+The system includes Laravel Sanctum for API authentication, enabling:
+- RESTful API endpoints
+- Token-based authentication
+- Rate limiting
+- CORS configuration
+
+## 🧪 Testing
+
+The project includes comprehensive testing setup:
+- **PHPUnit** for backend testing
+- **Feature tests** for user workflows
+- **Unit tests** for individual components
+- **Database testing** with SQLite
+
+## 📦 Deployment
+
+### Production Considerations
+- Configure production database
+- Set up proper caching (Redis recommended)
+- Configure queue workers for background jobs
+- Set up automated backups
+- Configure proper logging
+- Set up SSL certificates
+
+### Environment Variables
+Ensure all production environment variables are properly configured in your `.env` file.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and code quality checks
+5. Submit a pull request
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## 🆘 Support
+
+For support and questions:
+- Check the Laravel documentation
+- Review the Livewire documentation
+- Open an issue in the repository
+
+## 🔄 Changelog
+
+### Version 1.0.0
+- Initial release with core ERP functionality
+- Multi-role access control system
+- Complete inventory management
+- Reporting and analytics
+- Multi-language support
+- Docker deployment configuration
+
+---
+
+**Built with ❤️ using Laravel and Livewire**
