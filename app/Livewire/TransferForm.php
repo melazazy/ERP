@@ -51,7 +51,7 @@ public function updatedItemSearch()
                 'item_id' => $item['id'],
                 'item_name' => $item['name'],
                 'quantity' => null,
-                'unit_id' => null
+                'unit_id' => 1
             ];
             $this->items = [];
             $this->itemSearch = '';
@@ -79,15 +79,15 @@ public function updatedItemSearch()
         return 'TRF' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
     }
 
-    public function checkAvailability($itemId, $quantity, $unitId)
+    public function checkAvailability($itemId, $quantity)
     {
-        if (!$quantity || !$unitId) {
+        if (!$quantity) {
             return false;
         }
 
         return Requisition::where('department_id', $this->fromDepartmentId)
             ->where('item_id', $itemId)
-            ->where('unit_id', $unitId)
+            ->where('unit_id', 1)
             ->where('quantity', '>=', $quantity)
             ->exists();
     }
@@ -98,14 +98,11 @@ public function updatedItemSearch()
             'fromDepartmentId' => 'required|exists:departments,id',
             'toDepartmentId' => 'required|exists:departments,id|different:fromDepartmentId',
             'selectedItems' => 'required|array|min:1',
-            'selectedItems.*.quantity' => 'required|numeric|min:0.0001',
-            'selectedItems.*.unit_id' => 'required|exists:units,id'
+            'selectedItems.*.quantity' => 'required|numeric|min:0.0001'
         ], [
             'selectedItems.*.quantity.required' => 'Quantity is required',
             'selectedItems.*.quantity.numeric' => 'Quantity must be a number',
-            'selectedItems.*.quantity.min' => 'Quantity must be greater than 0',
-            'selectedItems.*.unit_id.required' => 'Unit is required',
-            'selectedItems.*.unit_id.exists' => 'Please select a valid unit'
+            'selectedItems.*.quantity.min' => 'Quantity must be greater than 0'
         ]);
 
         try {
@@ -113,8 +110,8 @@ public function updatedItemSearch()
 
             // Check availability for all items
             foreach ($this->selectedItems as $item) {
-                if (!$this->checkAvailability($item['item_id'], $item['quantity'], $item['unit_id'])) {
-                    throw new \Exception("Insufficient quantity available for item: {$item['item_name']} with selected unit");
+                if (!$this->checkAvailability($item['item_id'], $item['quantity'])) {
+                    throw new \Exception("Insufficient quantity available for item: {$item['item_name']}");
                 }
             }
 
@@ -124,12 +121,12 @@ public function updatedItemSearch()
                 // Find and update source requisition
                 $sourceReq = Requisition::where('department_id', $this->fromDepartmentId)
                     ->where('item_id', $item['item_id'])
-                    ->where('unit_id', $item['unit_id'])
+                    ->where('unit_id', 1)
                     ->where('quantity', '>=', $item['quantity'])
                     ->first();
 
                 if (!$sourceReq) {
-                    throw new \Exception("Item no longer available: {$item['item_name']} with selected unit");
+                    throw new \Exception("Item no longer available: {$item['item_name']}");
                 }
 
                 // Update source quantity
@@ -148,7 +145,7 @@ public function updatedItemSearch()
                     'quantity' => $item['quantity'],
                     'requested_date' => now(),
                     'status' => 'approved',
-                    'unit_id' => $item['unit_id']
+                    'unit_id' => 1
                 ]);
             }
 

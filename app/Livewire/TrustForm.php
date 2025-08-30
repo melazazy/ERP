@@ -159,8 +159,11 @@ class TrustForm extends Component
                 return;
             }
             
+            // Calculate available quantity using the same method as calculatePossibleAmount
+            $availableQuantity = $this->calculatePossibleAmount($itemId);
+            
             // Check if item is out of stock
-            if ($item['available_quantity'] <= 0) {
+            if ($availableQuantity <= 0) {
                 session()->flash('error', __('messages.item_out_of_stock'));
                 return;
             }
@@ -171,7 +174,7 @@ class TrustForm extends Component
                 'name' => $item['name'],
                 'code' => $item['code'],
                 'quantity' => 1,  // Default quantity
-                'available_quantity' => $this->calculatePossibleAmount($item['id']),
+                'available_quantity' => $availableQuantity,
             ];
             $this->itemSearch = '';  // Clear the search input
             $this->searchAllItems();  // Reset the items list

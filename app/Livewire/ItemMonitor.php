@@ -65,7 +65,12 @@ class ItemMonitor extends Component
             return;
         }
 
-        $item = Item::with(['receivings', 'requisitions', 'trusts'])->find($this->selectedItem);
+        $item = Item::with([
+            'receivings.supplier',
+            'receivings.department',
+            'requisitions.department',
+            'trusts.department',
+        ])->find($this->selectedItem);
 
         if (!$item) {
             return;
@@ -75,14 +80,15 @@ class ItemMonitor extends Component
             return [
                 'date' => $receiving->received_at,
                 'document_number' => $receiving->receiving_number,
-                'description' => 'وارد من ' . $receiving->supplier->name,
+                'description' => ($receiving->supplier ? $receiving->supplier->name : '') . ' → ' . ($receiving->department ? $receiving->department->name : ''),
                 'in' => $receiving->quantity,
                 'out' => null,
                 'balance' => null,
                 'in_price' => $receiving->unit_price,
                 'out_price' => null,
                 'balance_price' => null,
-                'type' => 'in'
+                'type' => 'in',
+                'transaction_type' => 'receiving'
             ];
         });
 
@@ -90,14 +96,15 @@ class ItemMonitor extends Component
             return [
                 'date' => $requisition->requested_date,
                 'document_number' => $requisition->requisition_number,
-                'description' => 'صرف إلى ' . $requisition->department->name,
+                'description' => $requisition->department ? $requisition->department->name : '',
                 'in' => null,
                 'out' => $requisition->quantity,
                 'balance' => null,
                 'in_price' => null,
                 'out_price' => null, // Will be set during movement calculation
                 'balance_price' => null,
-                'type' => 'out'
+                'type' => 'out',
+                'transaction_type' => 'requisition'
             ];
         });
 
@@ -105,14 +112,15 @@ class ItemMonitor extends Component
             return [
                 'date' => $trust->requested_date,
                 'document_number' => $trust->trust_number,
-                'description' => 'عهدة إلى ' . $trust->requester->name,
+                'description' => $trust->department ? $trust->department->name : '',
                 'in' => null,
                 'out' => $trust->quantity,
                 'balance' => null,
                 'in_price' => null,
                 'out_price' => null, // Will be set during movement calculation
                 'balance_price' => null,
-                'type' => 'out'
+                'type' => 'out',
+                'transaction_type' => 'trust'
             ];
         });
 
@@ -171,6 +179,7 @@ class ItemMonitor extends Component
         $movements = collect($this->movements)->map(function ($movement) {
             return [
                 'Date' => date('d/m/Y', strtotime($movement['date'])),
+                'ID' => $movement['transaction_id'],
                 'Document No.' => $movement['document_number'],
                 'Description' => $movement['description'],
                 'Quantity In' => $movement['in'] ?? '-',
@@ -223,21 +232,21 @@ class ItemMonitor extends Component
                 return [
                     ['Item Card: ' . $this->itemName],
                     ['Item Code: ' . $this->itemCode],
-                    ['', '', '', 'Quantities', '', '', 'Prices', '', ''],
-                    ['Date', 'Document No.', 'Description', 'In', 'Out', 'Balance', 'In', 'Out', 'Balance'],
+                    ['', '', '', '', 'Quantities', '', '', 'Prices', '', ''],
+                    ['Date', 'ID', 'Document No.', 'Description', 'In', 'Out', 'Balance', 'In', 'Out', 'Balance'],
                 ];
             }
 
             public function styles($sheet)
             {
                 // Merge cells for title and item code
-                $sheet->mergeCells('A1:I1');
-                $sheet->mergeCells('A2:I2');
-                $sheet->mergeCells('D3:F3');
-                $sheet->mergeCells('G3:I3');
+                $sheet->mergeCells('A1:J1');
+                $sheet->mergeCells('A2:J2');
+                $sheet->mergeCells('E3:G3');
+                $sheet->mergeCells('H3:J3');
 
                 // Title styling
-                $sheet->getStyle('A1:I2')->applyFromArray([
+                $sheet->getStyle('A1:J2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 14,
@@ -248,7 +257,7 @@ class ItemMonitor extends Component
                 ]);
 
                 // Headers styling
-                $sheet->getStyle('A3:I4')->applyFromArray([
+                $sheet->getStyle('A3:J4')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['argb' => 'FFFFFFFF'],
@@ -268,7 +277,7 @@ class ItemMonitor extends Component
                 ]);
 
                 // Data styling
-                $dataRange = 'A5:I' . ($this->movements->count() + 4);
+                $dataRange = 'A5:J' . ($this->movements->count() + 4);
                 $sheet->getStyle($dataRange)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -278,19 +287,19 @@ class ItemMonitor extends Component
                 ]);
 
                 // First set all text to black
-                $sheet->getStyle('A5:I' . ($this->movements->count() + 4))->getFont()->getColor()->setARGB('FF000000');
+                $sheet->getStyle('A5:J' . ($this->movements->count() + 4))->getFont()->getColor()->setARGB('FF000000');
 
                 // Style "In" quantities and prices in red
                 $lastRow = $this->movements->count() + 4;
                 for ($row = 5; $row <= $lastRow; $row++) {
-                    $inQuantity = $sheet->getCell('D' . $row)->getValue();
-                    $inPrice = $sheet->getCell('G' . $row)->getValue();
+                    $inQuantity = $sheet->getCell('E' . $row)->getValue();
+                    $inPrice = $sheet->getCell('H' . $row)->getValue();
                     
                     if ($inQuantity !== '-') {
-                        $sheet->getStyle('D' . $row)->getFont()->getColor()->setARGB('FFFF0000');
+                        $sheet->getStyle('E' . $row)->getFont()->getColor()->setARGB('FFFF0000');
                     }
                     if ($inPrice !== '-') {
-                        $sheet->getStyle('G' . $row)->getFont()->getColor()->setARGB('FFFF0000');
+                        $sheet->getStyle('H' . $row)->getFont()->getColor()->setARGB('FFFF0000');
                     }
                 }
 
@@ -298,16 +307,17 @@ class ItemMonitor extends Component
                 $lastDataRow = $this->movements->count() + 5;
                 $sheet->setCellValue("A{$lastDataRow}", '');
                 $sheet->setCellValue("B{$lastDataRow}", '');
-                $sheet->setCellValue("C{$lastDataRow}", 'Total');
-                $sheet->setCellValue("D{$lastDataRow}", $this->totalIn);
-                $sheet->setCellValue("E{$lastDataRow}", $this->totalOut);
-                $sheet->setCellValue("F{$lastDataRow}", $this->balance);
-                $sheet->setCellValue("G{$lastDataRow}", $this->totalInPrice);
-                $sheet->setCellValue("H{$lastDataRow}", $this->totalOutPrice);
-                $sheet->setCellValue("I{$lastDataRow}", $this->balancePrice);
+                $sheet->setCellValue("C{$lastDataRow}", '');
+                $sheet->setCellValue("D{$lastDataRow}", 'Total');
+                $sheet->setCellValue("E{$lastDataRow}", $this->totalIn);
+                $sheet->setCellValue("F{$lastDataRow}", $this->totalOut);
+                $sheet->setCellValue("G{$lastDataRow}", $this->balance);
+                $sheet->setCellValue("H{$lastDataRow}", $this->totalInPrice);
+                $sheet->setCellValue("I{$lastDataRow}", $this->totalOutPrice);
+                $sheet->setCellValue("J{$lastDataRow}", $this->balancePrice);
 
                 // Style the totals row
-                $sheet->getStyle("A{$lastDataRow}:I{$lastDataRow}")->applyFromArray([
+                $sheet->getStyle("A{$lastDataRow}:J{$lastDataRow}")->applyFromArray([
                     'font' => [
                         'bold' => true,
                     ],
@@ -318,10 +328,10 @@ class ItemMonitor extends Component
                 ]);
 
                 // Make "In" total red in the totals row
-                $sheet->getStyle("D{$lastDataRow}")->getFont()->getColor()->setARGB('FFFF0000');
+                $sheet->getStyle("E{$lastDataRow}")->getFont()->getColor()->setARGB('FFFF0000');
 
                 // Auto-size columns
-                foreach (range('A', 'I') as $column) {
+                foreach (range('A', 'J') as $column) {
                     $sheet->getColumnDimension($column)->setAutoSize(true);
                 }
 

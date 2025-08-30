@@ -67,7 +67,7 @@ class ItemCard extends Component
 
         // Process receivings in chunks
         Item::with(['receivings' => function($q) {
-            $q->orderBy('received_at')->with('supplier');
+            $q->orderBy('received_at')->with(['supplier', 'department']);
         }])->where('id', $this->selectedItem)
         ->chunk(1000, function($items) use (&$allMovements) {
             foreach($items as $item) {
@@ -78,7 +78,8 @@ class ItemCard extends Component
                         'type' => 'in',
                         'in_quantity' => $receiving->quantity,
                         'out_quantity' => null,
-                        'description' => $receiving->supplier->name
+                        'description' => ($receiving->supplier ? $receiving->supplier->name : '') . ' → ' . ($receiving->department ? $receiving->department->name : ''),
+                        'transaction_type' => 'receiving'
                     ];
                 });
                 $allMovements = $allMovements->concat($receivings);
@@ -98,7 +99,8 @@ class ItemCard extends Component
                         'type' => 'out',
                         'in_quantity' => null,
                         'out_quantity' => $requisition->quantity,
-                        'description' => $requisition->department->name
+                        'description' => $requisition->department->name,
+                        'transaction_type' => 'requisition'
                     ];
                 });
                 $allMovements = $allMovements->concat($requisitions);
@@ -107,7 +109,7 @@ class ItemCard extends Component
 
         // Process trusts in chunks
         Item::with(['trusts' => function($q) {
-            $q->orderBy('requested_date')->with('requester');
+            $q->orderBy('requested_date')->with(['department', 'requester']);
         }])->where('id', $this->selectedItem)
         ->chunk(1000, function($items) use (&$allMovements) {
             foreach($items as $item) {
@@ -118,7 +120,8 @@ class ItemCard extends Component
                         'type' => 'out',
                         'in_quantity' => null,
                         'out_quantity' => $trust->quantity,
-                        'description' => $trust->requester->name
+                        'description' => $trust->department ? $trust->department->name : '',
+                        'transaction_type' => 'trust'
                     ];
                 });
                 $allMovements = $allMovements->concat($trusts);
@@ -270,7 +273,7 @@ class ItemCard extends Component
                     ],
                 ]);
 
-                // Format column D as text
+                // Format columns as text
                 $sheet->getStyle('B4:F' . $lastRow)->getNumberFormat()
                     ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
 

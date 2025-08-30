@@ -80,8 +80,19 @@ class ItemReport extends Component
             }
 
             if ($this->selectedDepartment !== 'all') {
-                $query->whereHas('requisitions', function ($q) {
-                    $q->where('department_id', $this->selectedDepartment);
+                $departmentId = $this->selectedDepartment;
+                // Include items that have receivings OR requisitions OR trusts for the selected department
+                // This ensures items with no withdrawals still appear if they belong to the department by receivings
+                $query->where(function ($q) use ($departmentId) {
+                    $q->whereHas('receivings', function ($q2) use ($departmentId) {
+                        $q2->where('department_id', $departmentId);
+                    })
+                    ->orWhereHas('requisitions', function ($q2) use ($departmentId) {
+                        $q2->where('department_id', $departmentId);
+                    })
+                    ->orWhereHas('trusts', function ($q2) use ($departmentId) {
+                        $q2->where('department_id', $departmentId);
+                    });
                 });
             }
 
@@ -180,6 +191,9 @@ class ItemReport extends Component
             $openingReceivings = $item
                 ->receivings()
                 ->where('received_at', '<=', $endOfPreviousMonth)
+                ->when($this->selectedDepartment && $this->selectedDepartment !== 'all', function ($query) {
+                    $query->where('department_id', $this->selectedDepartment);
+                })
                 ->orderBy('received_at')
                 ->get();
 
@@ -195,6 +209,9 @@ class ItemReport extends Component
             $openingTrusts = $item
                 ->trusts()
                 ->where('requested_date', '<=', $endOfPreviousMonth)
+                ->when($this->selectedDepartment && $this->selectedDepartment !== 'all', function ($query) {
+                    $query->where('department_id', $this->selectedDepartment);
+                })
                 ->orderBy('requested_date')
                 ->get();
 
@@ -222,6 +239,9 @@ class ItemReport extends Component
             $currentReceivings = $item
                 ->receivings()
                 ->whereBetween('received_at', [$startOfMonth, $endOfMonth])
+                ->when($this->selectedDepartment && $this->selectedDepartment !== 'all', function ($query) {
+                    $query->where('department_id', $this->selectedDepartment);
+                })
                 ->orderBy('received_at')
                 ->get();
 
@@ -244,6 +264,9 @@ class ItemReport extends Component
             $currentTrusts = $item
                 ->trusts()
                 ->whereBetween('requested_date', [$startOfMonth, $endOfMonth])
+                ->when($this->selectedDepartment && $this->selectedDepartment !== 'all', function ($query) {
+                    $query->where('department_id', $this->selectedDepartment);
+                })
                 ->orderBy('requested_date')
                 ->get();
 
@@ -315,8 +338,18 @@ class ItemReport extends Component
             }
 
             if ($this->selectedDepartment !== 'all') {
-                $query->whereHas('requisitions', function ($q) {
-                    $q->where('department_id', $this->selectedDepartment);
+                $departmentId = $this->selectedDepartment;
+                // Include items that have receivings OR requisitions OR trusts for the selected department
+                $query->where(function ($q) use ($departmentId) {
+                    $q->whereHas('receivings', function ($q2) use ($departmentId) {
+                        $q2->where('department_id', $departmentId);
+                    })
+                    ->orWhereHas('requisitions', function ($q2) use ($departmentId) {
+                        $q2->where('department_id', $departmentId);
+                    })
+                    ->orWhereHas('trusts', function ($q2) use ($departmentId) {
+                        $q2->where('department_id', $departmentId);
+                    });
                 });
             }
 
